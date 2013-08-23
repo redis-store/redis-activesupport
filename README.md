@@ -1,6 +1,6 @@
 # Redis stores for ActiveSupport
 
-__`redis-activesupport`__ provides a cache for __ActiveSupport__. See the main [redis-store readme](https://github.com/jodosha/redis-store) for general guidelines.
+__`redis-activesupport`__ provides a cache for __ActiveSupport__. See the main [redis-store readme](https://github.com/redis-store/redis-store) for general guidelines.
 
 ## Installation
 
@@ -11,7 +11,7 @@ gem 'redis-activesupport'
 
 ### Usage
 
-If you are using redis-store with Rails, consider using the [redis-rails gem](https://github.com/jodosha/redis-store/tree/master/redis-rails) instead. For standalone usage:
+If you are using redis-store with Rails, consider using the [redis-rails gem](https://github.com/redis-store/redis-rails) instead. For standalone usage:
 
 ```ruby
 ActiveSupport::Cache.lookup_store :redis_store # { ... optional configuration ... }
@@ -21,7 +21,7 @@ ActiveSupport::Cache.lookup_store :redis_store # { ... optional configuration ..
 
 ```shell
 gem install bundler
-git clone git://github.com/jodosha/redis-activesupport.git
+git clone git://github.com/redis-store/redis-activesupport.git
 cd redis-activesupport
 bundle install
 bundle exec rake
