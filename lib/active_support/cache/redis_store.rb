@@ -1,4 +1,3 @@
-# encoding: UTF-8
 require 'redis-store'
 
 module ActiveSupport
@@ -39,11 +38,6 @@ module ActiveSupport
 
       # Delete objects for matched keys.
       #
-      # Performance note: this operation can be dangerous for large production
-      # databases, as it uses the Redis "KEYS" command, which is O(N) over the
-      # total number of keys in the database. Users of large Redis caches should
-      # avoid this method.
-      #
       # Example:
       #   cache.del_matched "rab*"
       def delete_matched(matcher, options = nil)
@@ -52,7 +46,7 @@ module ActiveSupport
           matcher = key_matcher(matcher, options)
           begin
             !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
-          rescue Errno::ECONNREFUSED => e
+          rescue Errno::ECONNREFUSED
             false
           end
         end
@@ -66,7 +60,6 @@ module ActiveSupport
       #   cache.read_multi "rabbit", "white-rabbit", :raw => true
       def read_multi(*names)
         values = @data.mget(*names)
-        values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
 
         # Remove the options hash before mapping keys to values
         names.extract_options!
@@ -130,22 +123,11 @@ module ActiveSupport
         end
       end
 
-      def expire(key, ttl)
-        @data.expire key, ttl
-      end
-
       # Clear all the data from the store.
       def clear
         instrument(:clear, nil, nil) do
           @data.flushdb
         end
-      end
-
-      # fixed problem with invalid exists? method
-      # https://github.com/rails/rails/commit/cad2c8f5791d5bd4af0f240d96e00bae76eabd2f
-      def exist?(name, options = nil)
-        res = super(name, options)
-        res || false
       end
 
       def stats
