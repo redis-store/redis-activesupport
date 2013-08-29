@@ -4,6 +4,8 @@ require 'redis-store'
 module ActiveSupport
   module Cache
     class RedisStore < Store
+      attr_reader :data
+
       # Instantiate the store.
       #
       # Example:
