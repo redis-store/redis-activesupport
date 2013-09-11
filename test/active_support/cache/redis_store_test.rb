@@ -40,18 +40,8 @@ describe ActiveSupport::Cache::RedisStore do
     with_store_management do |store|
       store.write "rabbit", @white_rabbit
       store.read("rabbit").must_equal(@white_rabbit)
-      store.expire "rabbit", 1.seconds
+      store.expire "rabbit", 1.second
       sleep 2
-      store.read("rabbit").must_be_nil
-    end
-  end
-
-  it "respects expiration time in minutes" do
-    with_store_management do |store|
-      store.write "rabbit", @white_rabbit
-      store.read("rabbit").must_equal(@white_rabbit)
-      store.expire "rabbit", 1.minutes
-      sleep 61
       store.read("rabbit").must_be_nil
     end
   end
@@ -176,7 +166,6 @@ describe ActiveSupport::Cache::RedisStore do
       store.fetch("rub-a-dub").must_equal("Flora de Cana")
       store.fetch("rabbit", :force => true) # force cache miss
       store.fetch("rabbit", :force => true, :expires_in => 1.second) { @white_rabbit }
-      # store.fetch("rabbit").must_equal(@white_rabbit)
       sleep 2
       store.fetch("rabbit").must_be_nil
     end
