@@ -196,6 +196,11 @@ describe ActiveSupport::Cache::RedisStore do
     result.must_include('rabbit')
   end
 
+  it "returns redis client for debugging" do
+    @store.redis.wont_be_nil
+  end
+
+
   describe "notifications" do
     it "notifies on #fetch" do
       with_notifications do
