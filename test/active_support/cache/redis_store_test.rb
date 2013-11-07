@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'ostruct'
 
 describe ActiveSupport::Cache::RedisStore do
   def setup
@@ -12,6 +13,16 @@ describe ActiveSupport::Cache::RedisStore do
       store.delete "counter"
       store.delete "rub-a-dub"
     end
+  end
+
+  it "namespaces all operations" do
+    address = "redis://127.0.0.1:6379/1/cache-namespace"
+    store   = ActiveSupport::Cache::RedisStore.new(address)
+    redis   = Redis.new(url: address)
+
+    store.write("white-rabbit", 0)
+
+    redis.exists('cache-namespace:white-rabbit').must_equal(true)
   end
 
   it "reads the data" do
