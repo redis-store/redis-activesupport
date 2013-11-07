@@ -157,6 +157,11 @@ module ActiveSupport
         @data.reconnect
       end
 
+      # Returns a redis client object
+      def redis
+        @data
+      end
+
       protected
         def write_entry(key, entry, options)
           method = options && options[:unless_exist] ? :setnx : :set
