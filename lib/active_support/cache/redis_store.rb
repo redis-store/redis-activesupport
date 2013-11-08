@@ -76,6 +76,26 @@ module ActiveSupport
         result
       end
 
+      def fetch_multi(*names)
+        results = read_multi(*names)
+        options = names.extract_options!
+        fetched = {}
+
+        @data.multi do
+          fetched = names.inject({}) do |memo, (name, _)|
+            memo[name] = results.fetch(name) do
+              value = yield name
+              write(name, value, options)
+              value
+            end
+
+            memo
+          end
+        end
+
+        fetched
+      end
+
       # Increment a key in the store.
       #
       # If the key doesn't exist it will be initialized on 0.

@@ -196,6 +196,19 @@ describe ActiveSupport::Cache::RedisStore do
     result.must_include('rabbit')
   end
 
+  describe "fetch_multi" do
+    it "reads existing keys and fills in anything missing" do
+      @store.write "bourbon", "makers"
+
+      result = @store.fetch_multi("bourbon", "rye") do |key|
+        "#{key}-was-missing"
+      end
+
+      result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
+      @store.read("rye").must_equal("rye-was-missing")
+    end
+  end
+
   describe "notifications" do
     it "notifies on #fetch" do
       with_notifications do
