@@ -45,7 +45,7 @@ module ActiveSupport
       # avoid this method.
       #
       # Example:
-      #   cache.del_matched "rab*"
+      #   cache.delete_matched "rab*"
       def delete_matched(matcher, options = nil)
         options = merged_options(options)
         instrument(:delete_matched, matcher.inspect) do
