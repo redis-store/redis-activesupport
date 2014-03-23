@@ -51,7 +51,7 @@ module ActiveSupport
         instrument(:delete_matched, matcher.inspect) do
           matcher = key_matcher(matcher, options)
           begin
-            !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
+            delete_matched_impl(matcher)
           rescue Errno::ECONNREFUSED, Redis::CannotConnectError
             false
           end
@@ -220,6 +220,41 @@ module ActiveSupport
             pattern
           end
         end
+
+        def delete_matched_impl(matcher)
+          impl = if @data.info['redis_version'] < '2.6.0'
+            'keys'
+          else
+            load_delete_matched_script
+            'script'
+          end
+          singleton_class.class_eval do
+            alias_method :delete_matched_impl, "delete_matched_using_#{impl}"
+          end
+          delete_matched_impl(matcher)
+        end
+
+        def delete_matched_using_keys(matcher)
+          !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
+        end
+
+        def delete_matched_using_script(matcher)
+          @data.evalsha(@delete_matched_script_sha, :argv => [matcher])
+        end
+
+        def load_delete_matched_script
+          @delete_matched_script_sha = @data.script(:load, DELETE_MATCHED_SCRIPT)
+        end
+
+        DELETE_MATCHED_SCRIPT = <<-LUA
+          local call = redis.call
+          local keys = call('keys', ARGV[1])
+          local count = table.getn(keys)
+          for i = 0, count do
+            call('del', keys[i])
+          end
+          return count
+        LUA
     end
   end
 end
