@@ -238,23 +238,21 @@ module ActiveSupport
           !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
         end
 
+        def load_delete_matched_script
+          @delete_matched_script_sha = @data.script(:load, <<-LUA)
+            local call = redis.call
+            local keys = call('keys', ARGV[1])
+            local count = table.getn(keys)
+            for i = 0, count do
+              call('del', keys[i])
+            end
+            return count
+          LUA
+        end
+
         def delete_matched_using_script(matcher)
           @data.evalsha(@delete_matched_script_sha, :argv => [matcher])
         end
-
-        def load_delete_matched_script
-          @delete_matched_script_sha = @data.script(:load, DELETE_MATCHED_SCRIPT)
-        end
-
-        DELETE_MATCHED_SCRIPT = <<-LUA
-          local call = redis.call
-          local keys = call('keys', ARGV[1])
-          local count = table.getn(keys)
-          for i = 0, count do
-            call('del', keys[i])
-          end
-          return count
-        LUA
     end
   end
 end
