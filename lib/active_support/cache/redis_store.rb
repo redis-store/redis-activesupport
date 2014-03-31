@@ -222,7 +222,7 @@ module ActiveSupport
         end
 
         def delete_matched_impl(matcher)
-          impl = if @data.info['redis_version'] < '2.6.0'
+          impl = if min_redis_version < '2.6.0'
             'keys'
           else
             load_delete_matched_script
@@ -239,7 +239,7 @@ module ActiveSupport
         end
 
         def load_delete_matched_script
-          @delete_matched_script_sha = @data.script(:load, <<-LUA)
+          @delete_matched_script_sha, _ = @data.script(:load, <<-LUA)
             local call = redis.call
             local keys = call('keys', ARGV[1])
             local count = table.getn(keys)
@@ -251,7 +251,21 @@ module ActiveSupport
         end
 
         def delete_matched_using_script(matcher)
-          @data.evalsha(@delete_matched_script_sha, :argv => [matcher])
+          nodes.each do |node|
+            node.evalsha(@delete_matched_script_sha, :argv => [matcher])
+          end
+        end
+
+        def min_redis_version
+          nodes.map { |node| node.info['redis_version'] }.min
+        end
+
+        def nodes
+          if Redis::Distributed === @data
+            @data.nodes
+          else
+            [@data]
+          end
         end
     end
   end
