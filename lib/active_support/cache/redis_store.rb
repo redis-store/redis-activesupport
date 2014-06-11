@@ -212,9 +212,9 @@ module ActiveSupport
         # __it doesn't accept Regular expressions__, because the Redis matcher is designed
         # only for strings with wildcards.
         def key_matcher(pattern, options)
+          raise ArgumentError, "Regexps aren't supported, please use string with wildcards." if pattern.is_a?(Regexp)
           prefix = options[:namespace].is_a?(Proc) ? options[:namespace].call : options[:namespace]
           if prefix
-            raise "Regexps aren't supported, please use string with wildcards." if pattern.is_a?(Regexp)
             "#{prefix}:#{pattern}"
           else
             pattern
