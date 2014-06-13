@@ -76,20 +76,26 @@ module ActiveSupport
         result
       end
 
+      # Fetches multiple keys from the cache using a single call to the server
+      # and filling in any cache misses. All read and write operations are
+      # executed atomically.
+      #
+      # Example:
+      #   cache.fetch_multi("rabbit", "white-rabbit") do |key|
+      #     "#{key}-was-missing"
+      #   end
       def fetch_multi(*names)
         results = read_multi(*names)
         options = names.extract_options!
         fetched = {}
 
         @data.multi do
-          fetched = names.inject({}) do |memo, (name, _)|
+          fetched = names.each_with_object({}) do |(name, _), memo|
             memo[name] = results.fetch(name) do
               value = yield name
               write(name, value, options)
               value
             end
-
-            memo
           end
         end
 
