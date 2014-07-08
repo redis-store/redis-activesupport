@@ -51,7 +51,11 @@ module ActiveSupport
         instrument(:delete_matched, matcher.inspect) do
           matcher = key_matcher(matcher, options)
           begin
-            !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
+            if @data.info['redis_version'] =~ /^2\.8\.*/
+              !(keys = @data.scan_each(match: matcher).to_a).empty? && @data.del(*keys)
+            else
+              !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
+            end
           rescue Errno::ECONNREFUSED, Redis::CannotConnectError
             false
           end
