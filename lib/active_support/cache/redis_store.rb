@@ -4,6 +4,8 @@ require 'redis-store'
 module ActiveSupport
   module Cache
     class RedisStore < Store
+      EXCEPTIONS = [Errno::ECONNREFUSED, Redis::TimeoutError, Errno::EINVAL,
+        Redis::CommandError, Redis::CannotConnectError]
       # Instantiate the store.
       #
       # Example:
@@ -52,7 +54,7 @@ module ActiveSupport
           matcher = key_matcher(matcher, options)
           begin
             !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
-          rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+          rescue *EXCEPTIONS
             false
           end
         end
@@ -181,7 +183,7 @@ module ActiveSupport
         def write_entry(key, entry, options)
           method = options && options[:unless_exist] ? :setnx : :set
           @data.send method, key, entry, options
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+        rescue *EXCEPTIONS
           false
         end
 
@@ -190,7 +192,7 @@ module ActiveSupport
           if entry
             entry.is_a?(ActiveSupport::Cache::Entry) ? entry : ActiveSupport::Cache::Entry.new(entry)
           end
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+        rescue *EXCEPTIONS
           nil
         end
 
@@ -201,7 +203,7 @@ module ActiveSupport
         #
         def delete_entry(key, options)
           @data.del key
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+        rescue *EXCEPTIONS
           false
         end
 
