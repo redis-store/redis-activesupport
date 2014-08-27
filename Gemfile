@@ -7,7 +7,7 @@ end
 if ::File.directory?(gem_path = '../redis-store-testing')
   gem 'redis-store-testing', path: gem_path
 else
-  gem 'redis-store-testing', git: 'git@github.com:YotpoLtd/testing.git'
+  gem 'redis-store-testing', git: 'https://github.com/YotpoLtd/testing.git'
 end
 
 gem 'i18n'
