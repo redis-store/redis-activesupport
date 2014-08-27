@@ -1,3 +1,6 @@
 Gemfile.lock
 *.gem
 tmp/
+.ruby-version
+.ruby-gemset
+.idea
