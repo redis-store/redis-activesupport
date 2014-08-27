@@ -197,6 +197,7 @@ describe ActiveSupport::Cache::RedisStore do
   end
 
   it "deletes all matched data using tags" do
+    @store.instance_variable_get(:@data).flushdb
     @store.write "views/rab/b/i/t.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.write "views/rab/b/i/t/g.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.instance_variable_get(:@data).smembers("tags/rab/b/i/t").must_be_kind_of Array
@@ -207,6 +208,7 @@ describe ActiveSupport::Cache::RedisStore do
   end
 
   it "deletes 1 matched data using tags without astrix" do
+    @store.instance_variable_get(:@data).flushdb
     @store.write "views/rab/b/i/t.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.write "views/rab/b/i/t/d.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.instance_variable_get(:@data).smembers("tags/rab/b/i/t").must_be_kind_of Array
@@ -217,6 +219,7 @@ describe ActiveSupport::Cache::RedisStore do
   end
 
   it "deletes 1 matched data using tags without astrix or sufix" do
+    @store.instance_variable_get(:@data).flushdb
     @store.write "views/rab/b/i/t.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.write "views/rab/b/i/t/d.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.instance_variable_get(:@data).smembers("tags/rab/b/i/t").must_be_kind_of Array
@@ -227,6 +230,7 @@ describe ActiveSupport::Cache::RedisStore do
   end
 
   it "deletes 1 matched data using tags with astrix as suffix" do
+    @store.instance_variable_get(:@data).flushdb
     @store.write "views/rab/b/i/t.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.write "views/rab/b/i/t/d.json?sdasd=asdasd", @white_rabbit, :use_tags => true
     @store.instance_variable_get(:@data).smembers("tags/rab/b/i/t").must_be_kind_of Array
@@ -238,6 +242,7 @@ describe ActiveSupport::Cache::RedisStore do
 
 
   it "deletes 100000 matched data using tags" do
+    @store.instance_variable_get(:@data).flushdb
     100000.times{|i| @store.write "views/rab/b/i/t?sdasd=asdasd#{i}", @white_rabbit, :use_tags => true}
     @store.instance_variable_get(:@data).smembers("tags/rab/b/i/t").must_be_kind_of Array
     @store.instance_variable_get(:@data).smembers("tags/rab/b/i/t").length.must_equal(100000)
