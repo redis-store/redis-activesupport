@@ -51,6 +51,11 @@ module ActiveSupport
         instrument(:delete_matched, matcher.inspect) do
           matcher = key_matcher(matcher, options)
           begin
+            if options && options[:use_tags]
+              delete_tag_tree(matcher)
+            else
+              !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
+            end
             !(keys = @data.keys(matcher)).empty? && @data.del(*keys)
           rescue Errno::ECONNREFUSED, Redis::CannotConnectError
             false
@@ -180,6 +185,7 @@ module ActiveSupport
       protected
         def write_entry(key, entry, options)
           method = options && options[:unless_exist] ? :setnx : :set
+          add_key_to_tags(key, options) if options && options[:use_tags]
           @data.send method, key, entry, options
         rescue Errno::ECONNREFUSED, Redis::CannotConnectError
           false
@@ -200,7 +206,11 @@ module ActiveSupport
         # It's really needed and use
         #
         def delete_entry(key, options)
-          @data.del key
+          if options[:use_tags] || key =~ /\*/
+            delete_matched key, options
+          else
+            @data.del key, options
+          end
         rescue Errno::ECONNREFUSED, Redis::CannotConnectError
           false
         end
@@ -219,6 +229,90 @@ module ActiveSupport
           else
             pattern
           end
+        end
+
+        # Delete all elements in a tag
+        def delete_tag_tree(key)
+          delete_full_tree = !(key =~ /[^\.]\*/).nil?
+          key = generate_tags_list(key, :last)
+          @data.evalsha(
+              delete_sha,
+              :keys => [key, delete_full_tree],
+              :argv => [nil]
+          ).to_i == 1
+        end
+
+        def delete_sha(refresh = false)
+          @delete_sha = nil if refresh
+          @delete_sha ||= begin
+            @data.script(
+                :load,
+                <<-EOF
+    local keys = redis.call('SMEMBERS', KEYS[1])
+    local pattern = (KEYS[2] == "false") and (string.gsub(KEYS[1], 'tags/', '') .. '%.')
+
+    if not pattern then table.insert(keys, KEYS[1]) end
+    local keysToDelete = {}
+    for keyCounter = 1, #keys do
+      if not pattern or string.match(keys[keyCounter], pattern) then
+        table.insert(keysToDelete, keys[keyCounter])
+      end
+      if keyCounter == #keys or (keyCounter % 500 == 0) then
+        if pattern then redis.call('SREM', KEYS[1], unpack(keysToDelete)) end
+        redis.call('DEL', unpack(keysToDelete))
+        keysToDelete = {}
+      end
+    end
+    return 1
+            EOF
+            )
+          end
+        end
+
+        # Generate the list of tags for an entry
+        def generate_tags_list(key, kind = :all, base_tag_depth = 3)
+          last_key = get_base_path(key)
+
+          return last_key if kind == :last
+
+          elements = last_key.split('/')
+          base = elements.shift(base_tag_depth).join('/')
+          keys = []
+          elements.each_with_index do |elm, idx|
+            base = [base, elm].join('/')
+            keys << base
+          end
+          return keys
+        end
+
+        def add_to_tags_sha(refresh = false)
+          @add_to_tags_sha = nil if refresh
+          @add_to_tags_sha ||= begin
+            @data.script(
+                :load,
+                <<-EOF
+for counter = 1,tonumber(KEYS[2]) do
+  redis.call('SADD', ARGV[counter], KEYS[1])
+end
+return 1
+            EOF
+            )
+          end
+        end
+
+        # Add an entry to a tag
+        def add_key_to_tags(key, options = {})
+          tags = generate_tags_list(key, :all, (options[:base_tag_depth] || 3))
+          @data.evalsha(
+              add_to_tags_sha,
+              :keys => [key, tags.size],
+              :argv => tags
+          ).to_i == 1
+        end
+
+        # breakdown the entry to it's elements so we can build a tag tree
+        def get_base_path(key)
+          key.gsub(/(\*|\?.*|\.|\/|json|xml)+$/, '').sub(/^views\//, 'tags/')
         end
     end
   end
