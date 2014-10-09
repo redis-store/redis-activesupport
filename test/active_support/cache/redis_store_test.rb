@@ -175,6 +175,21 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "increments an object key" do
+    with_store_management do |store|
+      3.times { store.increment({ hkey: 'test' }) }
+      store.read({ hkey: 'test' }, :raw => true).to_i.must_equal(3)
+    end
+  end
+
+  it "decrements an object key" do
+    with_store_management do |store|
+      3.times { store.increment({ hkey: 'test' }) }
+      2.times { store.decrement({ hkey: 'test' }) }
+      store.read({hkey: 'test'}, :raw => true).to_i.must_equal(1)
+    end
+  end
+
   it "increments a raw key" do
     with_store_management do |store|
       assert store.write("raw-counter", 1, :raw => true)

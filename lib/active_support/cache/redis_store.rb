@@ -146,8 +146,9 @@ module ActiveSupport
       #   cache.increment "rabbit"
       #   cache.read "rabbit", :raw => true       # => "1"
       def increment(key, amount = 1)
+        options = merged_options(nil)
         instrument(:increment, key, :amount => amount) do
-          with{|c| c.incrby key, amount}
+          with{|c| c.incrby namespaced_key(key, options), amount}
         end
       end
 
@@ -173,9 +174,9 @@ module ActiveSupport
       #   cache.decrement "rabbit"
       #   cache.read "rabbit", :raw => true       # => "-1"
       def decrement(key, amount = 1)
+        options = merged_options(nil)
         instrument(:decrement, key, :amount => amount) do
-          with{|c| c.decrby key, amount}
-
+          with{|c| c.decrby namespaced_key(key, options), amount}
         end
       end
 
