@@ -5,7 +5,7 @@ require 'connection_pool'
 describe ActiveSupport::Cache::RedisStore do
   def setup
     @store  = ActiveSupport::Cache::RedisStore.new
-    @dstore = ActiveSupport::Cache::RedisStore.new "redis://127.0.0.1:6380/1", "redis://127.0.0.1:6381/1"
+    @dstore = ActiveSupport::Cache::RedisStore.new "redis://127.0.0.1:6379/5", "redis://127.0.0.1:6379/6"
     @pool_store  = ActiveSupport::Cache::RedisStore.new("redis://127.0.0.1:6379/2", pool_size: 5, pool_timeout: 10)
     @external_pool_store = ActiveSupport::Cache::RedisStore.new(pool: ::ConnectionPool.new(size: 1, timeout: 1) { ::Redis::Store::Factory.create("redis://127.0.0.1:6379/3") })
 
