@@ -1,10 +1,20 @@
 require 'test_helper'
 require 'ostruct'
+require 'connection_pool'
 
 describe ActiveSupport::Cache::RedisStore do
   def setup
     @store  = ActiveSupport::Cache::RedisStore.new
     @dstore = ActiveSupport::Cache::RedisStore.new "redis://127.0.0.1:6380/1", "redis://127.0.0.1:6381/1"
+    @pool_store  = ActiveSupport::Cache::RedisStore.new("redis://127.0.0.1:6379/2", pool_size: 5, pool_timeout: 10)
+    @external_pool_store = ActiveSupport::Cache::RedisStore.new(pool: ::ConnectionPool.new(size: 1, timeout: 1) { ::Redis::Store::Factory.create("redis://127.0.0.1:6379/3") })
+
+    @pool_store.data.class.must_equal ::ConnectionPool
+    @pool_store.data.instance_variable_get(:@size).must_equal 5
+    @external_pool_store.data.class.must_equal ::ConnectionPool
+    @external_pool_store.data.instance_variable_get(:@size).must_equal 1
+
+
     @rabbit = OpenStruct.new :name => "bunny"
     @white_rabbit = OpenStruct.new :color => "white"
 
@@ -12,6 +22,12 @@ describe ActiveSupport::Cache::RedisStore do
       store.write "rabbit", @rabbit
       store.delete "counter"
       store.delete "rub-a-dub"
+    end
+  end
+
+  it "raises an error if :pool isn't a pool" do
+    assert_raises(RuntimeError, 'pool must be an instance of ConnectionPool') do
+      ActiveSupport::Cache::RedisStore.new(pool: 'poolio')
     end
   end
 
@@ -193,7 +209,7 @@ describe ActiveSupport::Cache::RedisStore do
   it "clears the store" do
     with_store_management do |store|
       store.clear
-      store.instance_variable_get(:@data).keys("*").flatten.must_be_empty
+      store.with { |client| client.keys("*") }.flatten.must_be_empty
     end
   end
 
@@ -352,6 +368,8 @@ describe ActiveSupport::Cache::RedisStore do
     def with_store_management
       yield @store
       yield @dstore
+      yield @pool_store
+      yield @external_pool_store
     end
 
     def with_notifications
