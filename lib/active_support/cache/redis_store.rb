@@ -42,8 +42,8 @@ module ActiveSupport
                   @options[:pool]
                 elsif [:pool_size, :pool_timeout].any? { |key| @options.has_key?(key) }
                   pool_options           = {}
-                  pool_options[:size]    = options[:pool_size]
-                  pool_options[:timeout] = options[:pool_timeout]
+                  pool_options[:size]    = options[:pool_size] if options[:pool_size]
+                  pool_options[:timeout] = options[:pool_timeout] if options[:pool_timeout]
                   @data                  = ::ConnectionPool.new(pool_options) { ::Redis::Store::Factory.create(addresses) }
                 else
                   ::Redis::Store::Factory.create(addresses)
