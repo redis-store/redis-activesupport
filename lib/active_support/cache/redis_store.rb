@@ -91,13 +91,15 @@ module ActiveSupport
       #   cache.read_multi "rabbit", "white-rabbit"
       #   cache.read_multi "rabbit", "white-rabbit", :raw => true
       def read_multi(*names)
-        values = with { |c| c.mget(*names) }
+        options = names.extract_options!
+        keys = names.map{|name| namespaced_key(name, options)}
+        values = with { |c| c.mget(*keys) }
         values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
 
         # Remove the options hash before mapping keys to values
         names.extract_options!
 
-        result = Hash[names.zip(values)]
+        result = Hash[keys.zip(values)]
         result.reject!{ |k,v| v.nil? }
         result
       end
@@ -110,7 +112,8 @@ module ActiveSupport
         with do |c|
           c.multi do
             fetched = names.inject({}) do |memo, (name, _)|
-              memo[name] = results.fetch(name) do
+              key = namespaced_key(name, options)
+              memo[key] = results.fetch(key) do
                 value = yield name
                 write(name, value, options)
                 value
