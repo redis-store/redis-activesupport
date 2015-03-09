@@ -38,13 +38,14 @@ module ActiveSupport
 
         @data = if @options[:pool]
                   raise "pool must be an instance of ConnectionPool" unless @options[:pool].is_a?(ConnectionPool)
-
+                  @pooled = true
                   @options[:pool]
                 elsif [:pool_size, :pool_timeout].any? { |key| @options.has_key?(key) }
                   pool_options           = {}
                   pool_options[:size]    = options[:pool_size] if options[:pool_size]
                   pool_options[:timeout] = options[:pool_timeout] if options[:pool_timeout]
-                  @data                  = ::ConnectionPool.new(pool_options) { ::Redis::Store::Factory.create(addresses) }
+                  @pooled = true
+                  ::ConnectionPool.new(pool_options) { ::Redis::Store::Factory.create(addresses) }
                 else
                   ::Redis::Store::Factory.create(addresses)
                 end
@@ -201,10 +202,10 @@ module ActiveSupport
       end
 
       def with(&block)
-        if @data.is_a?(::Redis::Store) || @data.is_a?(::Redis::DistributedStore)
-          block.call(@data)
-        else
+        if @pooled
           @data.with(&block)
+        else
+          block.call(@data)
         end
       end
 
