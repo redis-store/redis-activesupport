@@ -88,6 +88,13 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "writes the data with specified namespace" do
+    with_store_management do |store|
+      store.write "rabbit", @white_rabbit, namespace:'namespaced'
+      store.read("namespaced:rabbit").must_equal(@white_rabbit)
+    end
+  end
+
   it "writes the data with expiration time" do
     with_store_management do |store|
       store.write "rabbit", @white_rabbit, :expires_in => 1.second
@@ -143,6 +150,14 @@ describe ActiveSupport::Cache::RedisStore do
     with_store_management do |store|
       store.delete "rabbit"
       store.read("rabbit").must_be_nil
+    end
+  end
+
+  it "deletes namespaced data" do
+    with_store_management do |store|
+      store.write "rabbit", @white_rabbit, namespace:'namespaced'
+      store.delete "rabbit", namespace:'namespaced'
+      store.read("namespaced:rabbit").must_be_nil
     end
   end
 
@@ -225,10 +240,24 @@ describe ActiveSupport::Cache::RedisStore do
       store.fetch("rub-a-dub").must_be_nil
       store.fetch("rub-a-dub") { "Flora de Cana" }
       store.fetch("rub-a-dub").must_equal("Flora de Cana")
+    end
+  end
+
+  it "fetches data with expiration time" do
+    with_store_management do |store|
       store.fetch("rabbit", :force => true) # force cache miss
       store.fetch("rabbit", :force => true, :expires_in => 1.second) { @white_rabbit }
+      store.fetch("rabbit").must_equal(@white_rabbit)
       sleep 2
       store.fetch("rabbit").must_be_nil
+    end
+  end
+
+  it "fetches namespaced data" do
+    with_store_management do |store|
+      store.delete("rabbit", namespace:'namespaced')
+      store.fetch("rabbit", namespace:'namespaced'){@rabbit}.must_equal(@rabbit)
+      store.read("rabbit", namespace:'namespaced').must_equal(@rabbit)
     end
   end
 
@@ -246,6 +275,14 @@ describe ActiveSupport::Cache::RedisStore do
     result.must_include('rabbit')
   end
 
+  it "reads multiple namespaced keys" do
+    @store.write "rub-a-dub", "Flora de Cana", namespace:'namespaced'
+    @store.write "irish whisky", "Jameson", namespace:'namespaced'
+    result = @store.read_multi "rub-a-dub", "irish whisky", namespace:'namespaced'
+    result['namespaced:rub-a-dub'].must_equal("Flora de Cana")
+    result['namespaced:irish whisky'].must_equal("Jameson")
+  end
+
   describe "fetch_multi" do
     it "reads existing keys and fills in anything missing" do
       @store.write "bourbon", "makers"
@@ -256,6 +293,19 @@ describe ActiveSupport::Cache::RedisStore do
 
       result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
       @store.read("rye").must_equal("rye-was-missing")
+    end
+  end
+
+  describe "fetch_multi namespaced keys" do
+    it "reads existing keys and fills in anything missing" do
+      @store.write "bourbon", "makers", namespace:'namespaced'
+
+      result = @store.fetch_multi("bourbon", "rye", namespace:'namespaced') do |key|
+        "#{key}-was-missing"
+      end
+
+      result.must_equal({ "namespaced:bourbon" => "makers", "namespaced:rye" => "rye-was-missing" })
+      @store.read("namespaced:rye").must_equal("rye-was-missing")
     end
   end
 
