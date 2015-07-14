@@ -1,0 +1,5 @@
+redis-server:
+  port: 6380
+redis-server:
+  password: "password"
+  port: 6379

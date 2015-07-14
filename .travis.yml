@@ -7,8 +7,6 @@ rvm:
   - rbx-19mode
   - jruby-19mode
   - jruby-head
-services:
-  - redis-server
 matrix:
   allow_failures:
     - rvm: jruby-head
