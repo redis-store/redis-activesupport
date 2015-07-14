@@ -1,13 +1,19 @@
 language: ruby
 script: 'bundle exec rake'
 rvm:
+  - 1.9.3
+  - 2.0.0
   - 2.2.0
   - ruby-head
   - rbx-19mode
   - jruby-19mode
   - jruby-head
 services:
-  - redis-server --port 6380 --requirepass 'password'
+  redis-server:
+    port: 6380
+  redis-server:
+    password: "password"
+    port: 6379
 matrix:
   allow_failures:
     - rvm: jruby-head

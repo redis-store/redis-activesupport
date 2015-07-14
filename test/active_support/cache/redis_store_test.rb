@@ -25,6 +25,15 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "connects using an hash of options" do
+    address = "127.0.0.1"
+    options = { :port => 6379, :password => 'password' }
+    store = ActiveSupport::Cache::RedisStore.new(address, options)
+
+    store.write "rabbit", @rabbit,
+    store.read("rabbit").must_equal(@rabbit)
+  end
+
   it "raises an error if :pool isn't a pool" do
     assert_raises(RuntimeError, 'pool must be an instance of ConnectionPool') do
       ActiveSupport::Cache::RedisStore.new(pool: 'poolio')
