@@ -30,7 +30,7 @@ describe ActiveSupport::Cache::RedisStore do
     options = { :port => 6379, :password => 'password' }
     store = ActiveSupport::Cache::RedisStore.new(address, options)
 
-    store.write "rabbit", @rabbit,
+    store.write "rabbit", @rabbit
     store.read("rabbit").must_equal(@rabbit)
   end
 
