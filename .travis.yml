@@ -7,7 +7,7 @@ rvm:
   - jruby-19mode
   - jruby-head
 services:
-  - redis-server
+  - redis-server --port 6380 --requirepass 'password'
 matrix:
   allow_failures:
     - rvm: jruby-head
