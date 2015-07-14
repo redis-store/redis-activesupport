@@ -34,7 +34,7 @@ module ActiveSupport
       #     pool: ::ConnectionPool.new(size: 1, timeout: 1) { ::Redis::Store::Factory.create("localhost:6379/0") })
       #     # => supply an existing connection pool (e.g. for use with redis-sentinel or redis-failover)
       def initialize(*addresses)
-        @options = addresses.extract_options!
+        @options = addresses.dup.extract_options!
 
         @data = if @options[:pool]
                   raise "pool must be an instance of ConnectionPool" unless @options[:pool].is_a?(ConnectionPool)
