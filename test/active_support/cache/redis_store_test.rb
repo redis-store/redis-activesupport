@@ -25,6 +25,36 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "connects using an hash of options" do
+    address = { host: '127.0.0.1', port: '6380', db: '1' }
+    store = ActiveSupport::Cache::RedisStore.new(address.merge(pool_size: 5, pool_timeout: 10))
+    redis = Redis.new(url: "redis://127.0.0.1:6380/1")
+    redis.flushall
+
+    store.data.class.must_equal(::ConnectionPool)
+    store.data.instance_variable_get(:@size).must_equal(5)
+    store.data.instance_variable_get(:@timeout).must_equal(10)
+
+    store.write("rabbit", 0)
+
+    redis.exists("rabbit").must_equal(true)
+  end
+
+  it "connects using an string of options" do
+    address = "redis://127.0.0.1:6380/1"
+    store = ActiveSupport::Cache::RedisStore.new(address, pool_size: 5, pool_timeout: 10)
+    redis = Redis.new(url: address)
+    redis.flushall
+
+    store.data.class.must_equal(::ConnectionPool)
+    store.data.instance_variable_get(:@size).must_equal(5)
+    store.data.instance_variable_get(:@timeout).must_equal(10)
+
+    store.write("rabbit", 0)
+
+    redis.exists("rabbit").must_equal(true)
+  end
+
   it "raises an error if :pool isn't a pool" do
     assert_raises(RuntimeError, 'pool must be an instance of ConnectionPool') do
       ActiveSupport::Cache::RedisStore.new(pool: 'poolio')
@@ -63,7 +93,7 @@ describe ActiveSupport::Cache::RedisStore do
   end
 
   it "creates a distributed store when given multiple addresses" do
-    underlying_store = instantiate_store("redis://127.0.0.1:6380/1", 
+    underlying_store = instantiate_store("redis://127.0.0.1:6380/1",
                                          "redis://127.0.0.1:6381/1")
     underlying_store.must_be_instance_of(::Redis::DistributedStore)
   end
