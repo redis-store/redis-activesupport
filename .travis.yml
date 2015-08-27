@@ -1,5 +1,8 @@
 language: ruby
 script: 'bundle exec rake'
+gemfile:
+  - gemfiles/Gemfile.activesupport-3.x
+  - gemfiles/Gemfile.activesupport-4.x
 rvm:
   - 1.9.3
   - 2.0.0
