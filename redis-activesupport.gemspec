@@ -1,10 +1,9 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path('../lib', __FILE__)
-require 'redis/activesupport/version'
 
 Gem::Specification.new do |s|
   s.name        = 'redis-activesupport'
-  s.version     = Redis::ActiveSupport::VERSION
+  s.version     = '4.1.1'
   s.authors     = ['Luca Guidi']
   s.email       = ['me@lucaguidi.com']
   s.homepage    = 'http://redis-store.org/redis-activesupport'
@@ -20,7 +19,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_runtime_dependency 'redis-store',   '~> 1.1.0'
-  s.add_runtime_dependency 'activesupport', '~> 4'
+  s.add_runtime_dependency 'activesupport', '~> 3'
 
   s.add_development_dependency 'rake',     '~> 10'
   s.add_development_dependency 'bundler',  '~> 1.3'
