@@ -3,9 +3,9 @@ $:.push File.expand_path('../lib', __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = 'redis-activesupport'
-  s.version     = '4.1.1'
-  s.authors     = ['Luca Guidi']
-  s.email       = ['me@lucaguidi.com']
+  s.version     = '4.1.2'
+  s.authors     = ['Luca Guidi', 'Ryan Bigg']
+  s.email       = ['me@lucaguidi.com', 'me@ryanbigg.com']
   s.homepage    = 'http://redis-store.org/redis-activesupport'
   s.summary     = %q{Redis store for ActiveSupport}
   s.description = %q{Redis store for ActiveSupport}
