@@ -74,12 +74,8 @@ module ActiveSupport
         options = merged_options(options)
         instrument(:delete_matched, matcher.inspect) do
           matcher = key_matcher(matcher, options)
-          begin
-            with do |store|
-              !(keys = store.keys(matcher)).empty? && store.del(*keys)
-            end
-          rescue Errno::ECONNREFUSED, Redis::CannotConnectError
-            false
+          with do |store|
+            !(keys = store.keys(matcher)).empty? && store.del(*keys)
           end
         end
       end
@@ -220,8 +216,6 @@ module ActiveSupport
         def write_entry(key, entry, options)
           method = options && options[:unless_exist] ? :setnx : :set
           with { |client| client.send method, key, entry, options }
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
-          false
         end
 
         def read_entry(key, options)
@@ -229,8 +223,6 @@ module ActiveSupport
           if entry
             entry.is_a?(ActiveSupport::Cache::Entry) ? entry : ActiveSupport::Cache::Entry.new(entry)
           end
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
-          nil
         end
 
         ##
@@ -240,8 +232,6 @@ module ActiveSupport
         #
         def delete_entry(key, options)
           entry = with { |c| c.del key }
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
-          false
         end
 
 

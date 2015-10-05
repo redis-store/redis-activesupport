@@ -111,6 +111,16 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "raises on read when redis is unavailable" do
+    ActiveSupport::Cache::RedisStore.any_instance.stubs(:with).raises(Redis::CannotConnectError)
+
+    with_store_management do |store|
+      assert_raises(Redis::CannotConnectError) do
+        store.read("rabbit")
+      end
+    end
+  end
+
   it "writes the data" do
     with_store_management do |store|
       store.write "rabbit", @white_rabbit
@@ -131,6 +141,16 @@ describe ActiveSupport::Cache::RedisStore do
       store.read("rabbit").must_equal(@white_rabbit)
       sleep 2
       store.read("rabbit").must_be_nil
+    end
+  end
+
+  it "raises on writes when redis is unavailable" do
+    ActiveSupport::Cache::RedisStore.any_instance.stubs(:with).raises(Redis::CannotConnectError)
+
+    with_store_management do |store|
+      assert_raises(Redis::CannotConnectError) do
+        store.write "rabbit", @white_rabbit, :expires_in => 1.second
+      end
     end
   end
 
@@ -183,6 +203,16 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "raises on delete when redis is unavailable" do
+    ActiveSupport::Cache::RedisStore.any_instance.stubs(:with).raises(Redis::CannotConnectError)
+
+    with_store_management do |store|
+      assert_raises(Redis::CannotConnectError) do
+        store.delete "rabbit"
+      end
+    end
+  end
+
   it "deletes namespaced data" do
     with_store_management do |store|
       store.write "rabbit", @white_rabbit, namespace:'namespaced'
@@ -195,6 +225,16 @@ describe ActiveSupport::Cache::RedisStore do
     with_store_management do |store|
       store.delete_matched "rabb*"
       store.read("rabbit").must_be_nil
+    end
+  end
+
+  it "raises on delete_matched when redis is unavailable" do
+    ActiveSupport::Cache::RedisStore.any_instance.stubs(:with).raises(Redis::CannotConnectError)
+
+    with_store_management do |store|
+      assert_raises(Redis::CannotConnectError) do
+        store.delete_matched "rabb*"
+      end
     end
   end
 
