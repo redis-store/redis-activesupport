@@ -1,3 +1,5 @@
+[![Gem Version](https://badge.fury.io/rb/redis-activesupport.png)](http://badge.fury.io/rb/redis-activesupport) [![Build Status](https://secure.travis-ci.org/redis-store/redis-activesupport.png?branch=master)](http://travis-ci.org/jodosha/redis-activesupport?branch=master) [![Code Climate](https://codeclimate.com/github/jodosha/redis-store.png)](https://codeclimate.com/github/redis-store/redis-activesupport)
+
 # Redis stores for ActiveSupport
 
 __`redis-activesupport`__ provides a cache for __ActiveSupport__. See the main [redis-store readme](https://github.com/redis-store/redis-store) for general guidelines.
@@ -28,10 +30,6 @@ bundle exec rake
 ```
 
 If you are on **Snow Leopard** you have to run `env ARCHFLAGS="-arch x86_64" bundle exec rake`
-
-## Status
-
-[![Gem Version](https://badge.fury.io/rb/redis-activesupport.png)](http://badge.fury.io/rb/redis-activesupport) [![Build Status](https://secure.travis-ci.org/redis-store/redis-activesupport.png?branch=master)](http://travis-ci.org/jodosha/redis-activesupport?branch=master) [![Code Climate](https://codeclimate.com/github/jodosha/redis-store.png)](https://codeclimate.com/github/redis-store/redis-activesupport)
 
 ## Copyright
 
