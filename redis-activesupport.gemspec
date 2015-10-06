@@ -3,7 +3,7 @@ $:.push File.expand_path('../lib', __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = 'redis-activesupport'
-  s.version     = '4.1.3'
+  s.version     = '4.1.4'
   s.authors     = ['Luca Guidi', 'Ryan Bigg']
   s.email       = ['me@lucaguidi.com', 'me@ryanbigg.com']
   s.homepage    = 'http://redis-store.org/redis-activesupport'
