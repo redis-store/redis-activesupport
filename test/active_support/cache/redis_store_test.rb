@@ -440,6 +440,60 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  describe "raise_errors => true" do
+    def setup
+      @raise_error_store = ActiveSupport::Cache::RedisStore.new("redis://127.0.0.1:6380/1", :raise_errors => true)
+      @raise_error_store.stubs(:with).raises(Redis::CannotConnectError)
+    end
+
+    it "raises on read when redis is unavailable" do
+      assert_raises(Redis::CannotConnectError) do
+        @raise_error_store.read("rabbit")
+      end
+    end
+
+    it "raises on writes when redis is unavailable" do
+      assert_raises(Redis::CannotConnectError) do
+        @raise_error_store.write "rabbit", @white_rabbit, :expires_in => 1.second
+      end
+    end
+
+    it "raises on delete when redis is unavailable" do
+      assert_raises(Redis::CannotConnectError) do
+        @raise_error_store.delete "rabbit"
+      end
+    end
+
+    it "raises on delete_matched when redis is unavailable" do
+      assert_raises(Redis::CannotConnectError) do
+        @raise_error_store.delete_matched "rabb*"
+      end
+    end
+  end
+
+  describe "raise_errors => false" do
+    def setup
+      @raise_error_store = ActiveSupport::Cache::RedisStore.new("redis://127.0.0.1:6380/1")
+      @raise_error_store.stubs(:with).raises(Redis::CannotConnectError)
+    end
+
+    it "is nil when redis is unavailable" do
+      @raise_error_store.read("rabbit").must_be_nil
+    end
+
+    it "returns false when redis is unavailable" do
+      @raise_error_store.write("rabbit", @white_rabbit, :expires_in => 1.second).must_equal(false)
+    end
+
+    it "returns false when redis is unavailable" do
+      @raise_error_store.delete("rabbit").must_equal(false)
+    end
+
+    it "raises on delete_matched when redis is unavailable" do
+      @raise_error_store.delete_matched("rabb*").must_equal(false)
+    end
+  end
+
   private
     def instantiate_store(*addresses)
       ActiveSupport::Cache::RedisStore.new(*addresses).instance_variable_get(:@data)

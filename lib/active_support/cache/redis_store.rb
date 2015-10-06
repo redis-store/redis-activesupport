@@ -78,7 +78,8 @@ module ActiveSupport
             with do |store|
               !(keys = store.keys(matcher)).empty? && store.del(*keys)
             end
-          rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+          rescue Errno::ECONNREFUSED, Redis::CannotConnectError => e
+            raise if raise_errors?
             false
           end
         end
@@ -220,7 +221,8 @@ module ActiveSupport
         def write_entry(key, entry, options)
           method = options && options[:unless_exist] ? :setnx : :set
           with { |client| client.send method, key, entry, options }
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+        rescue Errno::ECONNREFUSED, Redis::CannotConnectError => e
+          raise if raise_errors?
           false
         end
 
@@ -229,7 +231,8 @@ module ActiveSupport
           if entry
             entry.is_a?(ActiveSupport::Cache::Entry) ? entry : ActiveSupport::Cache::Entry.new(entry)
           end
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+        rescue Errno::ECONNREFUSED, Redis::CannotConnectError => e
+          raise if raise_errors?
           nil
         end
 
@@ -240,8 +243,13 @@ module ActiveSupport
         #
         def delete_entry(key, options)
           entry = with { |c| c.del key }
-        rescue Errno::ECONNREFUSED, Redis::CannotConnectError
+        rescue Errno::ECONNREFUSED, Redis::CannotConnectError => e
+          raise if raise_errors?
           false
+        end
+
+        def raise_errors?
+          !!@options[:raise_errors]
         end
 
 
