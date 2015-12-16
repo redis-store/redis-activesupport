@@ -309,8 +309,8 @@ describe ActiveSupport::Cache::RedisStore do
     @store.write "rub-a-dub", "Flora de Cana", namespace:'namespaced'
     @store.write "irish whisky", "Jameson", namespace:'namespaced'
     result = @store.read_multi "rub-a-dub", "irish whisky", namespace:'namespaced'
-    result['namespaced:rub-a-dub'].must_equal("Flora de Cana")
-    result['namespaced:irish whisky'].must_equal("Jameson")
+    result['rub-a-dub'].must_equal("Flora de Cana")
+    result['irish whisky'].must_equal("Jameson")
   end
 
   describe "fetch_multi" do
@@ -334,7 +334,7 @@ describe ActiveSupport::Cache::RedisStore do
         "#{key}-was-missing"
       end
 
-      result.must_equal({ "namespaced:bourbon" => "makers", "namespaced:rye" => "rye-was-missing" })
+      result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
       @store.read("namespaced:rye").must_equal("rye-was-missing")
     end
   end
