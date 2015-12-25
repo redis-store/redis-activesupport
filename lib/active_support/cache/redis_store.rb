@@ -267,6 +267,14 @@ module ActiveSupport
             pattern
           end
         end
+
+      private
+
+        if ActiveSupport::VERSION::MAJOR < 5
+          def normalize_key(*args)
+            namespaced_key(*args)
+          end
+        end
     end
   end
 end
