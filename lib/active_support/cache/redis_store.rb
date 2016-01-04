@@ -109,18 +109,23 @@ module ActiveSupport
         results = read_multi(*names)
         options = names.extract_options!
         fetched = {}
+        need_writes = {}
+
+        fetched = names.inject({}) do |memo, (name, _)|
+          key = namespaced_key(name, options)
+          memo[key] = results.fetch(key) do
+            value = yield name
+            need_writes[name] = value
+            value
+          end
+
+          memo
+        end
 
         with do |c|
           c.multi do
-            fetched = names.inject({}) do |memo, (name, _)|
-              key = namespaced_key(name, options)
-              memo[key] = results.fetch(key) do
-                value = yield name
-                write(name, value, options)
-                value
-              end
-
-              memo
+            need_writes.each do |name, value|
+              write(name, value, options)
             end
           end
         end
