@@ -78,7 +78,7 @@ module ActiveSupport
             with do |store|
               !(keys = store.keys(matcher)).empty? && store.del(*keys)
             end
-          rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError => e
+          rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
             raise if raise_errors?
             false
           end
@@ -221,7 +221,7 @@ module ActiveSupport
         def write_entry(key, entry, options)
           method = options && options[:unless_exist] ? :setnx : :set
           with { |client| client.send method, key, entry, options }
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError => e
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
           raise if raise_errors?
           false
         end
@@ -231,7 +231,7 @@ module ActiveSupport
           if entry
             entry.is_a?(ActiveSupport::Cache::Entry) ? entry : ActiveSupport::Cache::Entry.new(entry)
           end
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError => e
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
           raise if raise_errors?
           nil
         end
@@ -242,8 +242,8 @@ module ActiveSupport
         # It's really needed and use
         #
         def delete_entry(key, options)
-          entry = with { |c| c.del key }
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError => e
+          with { |c| c.del key }
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
           raise if raise_errors?
           false
         end
