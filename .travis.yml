@@ -3,10 +3,11 @@ script: 'bundle exec rake'
 gemfile:
   - gemfiles/Gemfile.activesupport-3.x
   - gemfiles/Gemfile.activesupport-4.x
+  - gemfiles/Gemfile.activesupport-5.x
 rvm:
   - 1.9.3
   - 2.0.0
-  - 2.1.5
+  - 2.1.7
   - 2.2.3
   - 2.3.0
   - ruby-head
@@ -16,6 +17,13 @@ rvm:
 services:
   - redis-server
 matrix:
+  exclude:
+    - rvm: 1.9.3
+      gemfile: gemfiles/Gemfile.activesupport-5.x
+    - rvm: 2.0.0
+      gemfile: gemfiles/Gemfile.activesupport-5.x
+    - rvm: 2.1.5
+      gemfile: gemfiles/Gemfile.activesupport-5.x
   allow_failures:
     - rvm: jruby-head
     - rvm: ruby-head
