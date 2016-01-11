@@ -206,7 +206,7 @@ module ActiveSupport
       end
 
       def with(&block)
-        if @pooled
+        if defined?(@pooled) && @pooled
           @data.with(&block)
         else
           block.call(@data)
