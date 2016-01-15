@@ -508,12 +508,12 @@ describe ActiveSupport::Cache::RedisStore do
 
     def with_notifications
       @events = [ ]
-      ActiveSupport::Cache::RedisStore.instrument = true
+      ActiveSupport::Cache::RedisStore.instrument = true if ActiveSupport::VERSION::MAJOR < 5
       ActiveSupport::Notifications.subscribe(/^cache_(.*)\.active_support$/) do |*args|
         @events << ActiveSupport::Notifications::Event.new(*args)
       end
       yield
-      ActiveSupport::Cache::RedisStore.instrument = false
+      ActiveSupport::Cache::RedisStore.instrument = false if ActiveSupport::VERSION::MAJOR < 5
     end
 end
 
