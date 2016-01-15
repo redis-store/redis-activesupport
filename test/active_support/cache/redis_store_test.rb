@@ -345,10 +345,16 @@ describe ActiveSupport::Cache::RedisStore do
         @store.fetch("radiohead") { "House Of Cards" }
       end
 
-      read, generate, write = @events
+      if ActiveSupport::VERSION::MAJOR < 5
+        read, generate, write = @events
+        read_payload = { :key => 'radiohead', :super_operation => :fetch }
+      else
+        generate, write, read = @events
+        read_payload = { :key => 'radiohead', :super_operation => :fetch, hit: false }
+      end
 
       read.name.must_equal('cache_read.active_support')
-      read.payload.must_equal({ :key => 'radiohead', :super_operation => :fetch })
+      read.payload.must_equal(read_payload)
 
       generate.name.must_equal('cache_generate.active_support')
       generate.payload.must_equal({ :key => 'radiohead' })
@@ -508,12 +514,25 @@ describe ActiveSupport::Cache::RedisStore do
 
     def with_notifications
       @events = [ ]
-      ActiveSupport::Cache::RedisStore.instrument = true
-      ActiveSupport::Notifications.subscribe(/^cache_(.*)\.active_support$/) do |*args|
-        @events << ActiveSupport::Notifications::Event.new(*args)
+      instrument_store do
+        ActiveSupport::Notifications.subscribe(/^cache_(.*)\.active_support$/) do |*args|
+          @events << ActiveSupport::Notifications::Event.new(*args)
+        end
+        yield
       end
-      yield
-      ActiveSupport::Cache::RedisStore.instrument = false
+    end
+
+    if ActiveSupport::VERSION::MAJOR < 5
+      def instrument_store
+        ActiveSupport::Cache::RedisStore.instrument = true
+        yield
+      ensure
+        ActiveSupport::Cache::RedisStore.instrument = false
+      end
+    else
+      def instrument_store
+        yield
+      end
     end
 end
 
