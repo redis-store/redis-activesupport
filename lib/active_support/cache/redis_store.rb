@@ -100,7 +100,7 @@ module ActiveSupport
         # Remove the options hash before mapping keys to values
         names.extract_options!
 
-        result = Hash[keys.zip(values)]
+        result = Hash[names.zip(values)]
         result.reject!{ |k,v| v.nil? }
         result
       end
@@ -113,8 +113,7 @@ module ActiveSupport
         with do |c|
           c.multi do
             fetched = names.inject({}) do |memo, (name, _)|
-              key = namespaced_key(name, options)
-              memo[key] = results.fetch(key) do
+              memo[name] = results.fetch(name) do
                 value = yield name
                 write(name, value, options)
                 value
