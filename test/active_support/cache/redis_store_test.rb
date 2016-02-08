@@ -324,18 +324,48 @@ describe ActiveSupport::Cache::RedisStore do
       result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
       @store.read("rye").must_equal("rye-was-missing")
     end
+
+    it "fetch command within fetch_multi block" do
+      @store.delete 'rye'
+      @store.write "bourbon", "makers"
+
+      result = @store.fetch_multi("bourbon", "rye") do |key|
+        @store.fetch "inner-#{key}" do
+          "#{key}-was-missing"
+        end
+      end
+
+      result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
+      @store.read("rye").must_equal("rye-was-missing")
+      @store.read("inner-rye").must_equal("rye-was-missing")
+    end
   end
 
   describe "fetch_multi namespaced keys" do
     it "reads existing keys and fills in anything missing" do
-      @store.write "bourbon", "makers", namespace:'namespaced'
+      @store.write "bourbon", "makers", namespace: 'namespaced'
 
-      result = @store.fetch_multi("bourbon", "rye", namespace:'namespaced') do |key|
+      result = @store.fetch_multi("bourbon", "rye", namespace: 'namespaced') do |key|
         "#{key}-was-missing"
       end
 
       result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
       @store.read("namespaced:rye").must_equal("rye-was-missing")
+    end
+
+    it "fetch command within fetch_multi block" do
+      @store.delete 'namespaced:rye'
+      @store.write "bourbon", "makers", namespace: 'namespaced'
+
+      result = @store.fetch_multi("bourbon", "rye", namespace: 'namespaced') do |key|
+        @store.fetch "namespaced:inner-#{key}" do
+          "#{key}-was-missing"
+        end
+      end
+
+      result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
+      @store.read("namespaced:rye").must_equal("rye-was-missing")
+      @store.read("namespaced:inner-rye").must_equal("rye-was-missing")
     end
   end
 
