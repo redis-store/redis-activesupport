@@ -228,6 +228,14 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "increments a key with options argument" do
+    with_store_management do |store|
+      assert store.write("raw-counter", 1, :raw => true)
+      store.increment("raw-counter", 2, nil)
+      store.read("raw-counter", :raw => true).to_i.must_equal(3)
+    end
+  end
+  
   it "decrements a raw key" do
     with_store_management do |store|
       assert store.write("raw-counter", 3, :raw => true)
@@ -247,6 +255,14 @@ describe ActiveSupport::Cache::RedisStore do
     with_store_management do |store|
       3.times { store.increment "counter" }
       store.decrement "counter", 2
+      store.read("counter", :raw => true).to_i.must_equal(1)
+    end
+  end
+
+  it "decrements a key with an options argument" do
+    with_store_management do |store|
+      3.times { store.increment "counter" }
+      store.decrement "counter", 2, nil
       store.read("counter", :raw => true).to_i.must_equal(1)
     end
   end
