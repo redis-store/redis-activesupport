@@ -57,7 +57,7 @@ module ActiveSupport
         options = merged_options(options)
         instrument(:write, name, options) do |payload|
           entry = options[:raw].present? ? value : Entry.new(value, options)
-          write_entry(namespaced_key(name, options), entry, options)
+          write_entry(normalize_key(name, options), entry, options)
         end
       end
 
@@ -93,7 +93,7 @@ module ActiveSupport
       #   cache.read_multi "rabbit", "white-rabbit", :raw => true
       def read_multi(*names)
         options = names.extract_options!
-        keys = names.map{|name| namespaced_key(name, options)}
+        keys = names.map{|name| normalize_key(name, options)}
         values = with { |c| c.mget(*keys) }
         values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
 
@@ -269,6 +269,14 @@ module ActiveSupport
             "#{prefix}:#{pattern}"
           else
             pattern
+          end
+        end
+
+      private
+
+        if ActiveSupport::VERSION::MAJOR < 5
+          def normalize_key(*args)
+            namespaced_key(*args)
           end
         end
     end
