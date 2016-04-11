@@ -188,7 +188,8 @@ module ActiveSupport
       end
 
       def expire(key, ttl)
-        with { |c| c.expire key, ttl }
+        options = merged_options(nil)
+        with { |c| c.expire namespaced_key(key, options), ttl }
       end
 
       # Clear all the data from the store.
