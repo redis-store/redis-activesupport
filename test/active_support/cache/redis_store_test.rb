@@ -145,6 +145,16 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  it "respects expiration time in seconds for object key" do
+    with_store_management do |store|
+      store.write({ hkey: 'test' }, @white_rabbit)
+      store.read({ hkey: 'test' }).must_equal(@white_rabbit)
+      store.expire({ hkey: 'test' }, 1.second)
+      sleep 2
+      store.read({ hkey: 'test' }).must_be_nil
+    end
+  end
+
   it "does't write data if :unless_exist option is true" do
     with_store_management do |store|
       store.write "rabbit", @white_rabbit, :unless_exist => true
