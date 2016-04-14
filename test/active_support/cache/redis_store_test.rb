@@ -22,6 +22,7 @@ describe ActiveSupport::Cache::RedisStore do
       store.write "rabbit", @rabbit
       store.delete "counter"
       store.delete "rub-a-dub"
+      store.delete({hkey: 'test'})
     end
   end
 
@@ -217,6 +218,21 @@ describe ActiveSupport::Cache::RedisStore do
       3.times { store.increment "counter" }
       2.times { store.decrement "counter" }
       store.read("counter", :raw => true).to_i.must_equal(1)
+    end
+  end
+
+  it "increments an object key" do
+    with_store_management do |store|
+      3.times { store.increment({ hkey: 'test' }) }
+      store.read({ hkey: 'test' }, :raw => true).to_i.must_equal(3)
+    end
+  end
+
+  it "decrements an object key" do
+    with_store_management do |store|
+      3.times { store.increment({ hkey: 'test' }) }
+      2.times { store.decrement({ hkey: 'test' }) }
+      store.read({hkey: 'test'}, :raw => true).to_i.must_equal(1)
     end
   end
 
