@@ -392,9 +392,14 @@ describe ActiveSupport::Cache::RedisStore do
       end
 
       read, generate, write = @events
+      if ActiveSupport::VERSION::MAJOR < 5
+        read_payload = { :key => 'radiohead', :super_operation => :fetch }
+      else
+        read_payload = { :key => 'radiohead', :super_operation => :fetch, hit: false }
+      end
 
       read.name.must_equal('cache_read.active_support')
-      read.payload.must_equal({ :key => 'radiohead', :super_operation => :fetch })
+      read.payload.must_equal(read_payload)
 
       generate.name.must_equal('cache_generate.active_support')
       generate.payload.must_equal({ :key => 'radiohead' })
@@ -554,12 +559,19 @@ describe ActiveSupport::Cache::RedisStore do
 
     def with_notifications
       @events = [ ]
-      ActiveSupport::Cache::RedisStore.instrument = true
+      ActiveSupport::Cache::RedisStore.instrument = true if instrument?
       ActiveSupport::Notifications.subscribe(/^cache_(.*)\.active_support$/) do |*args|
         @events << ActiveSupport::Notifications::Event.new(*args)
       end
       yield
-      ActiveSupport::Cache::RedisStore.instrument = false
+    ensure
+      ActiveSupport::Cache::RedisStore.instrument = false if instrument?
+    end
+
+    # ActiveSupport::Cache.instrument is always +true+ since Rails 4.2.0
+    def instrument?
+      ActiveSupport::VERSION::MAJOR < 4 ||
+       ActiveSupport::VERSION::MAJOR == 4 && ActiveSupport::VERSION::MINOR < 2
     end
 end
 
