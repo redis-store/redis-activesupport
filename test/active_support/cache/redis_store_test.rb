@@ -317,7 +317,7 @@ describe ActiveSupport::Cache::RedisStore do
 
   it "fetches data with expiration time" do
     with_store_management do |store|
-      store.fetch("rabbit", :force => true) # force cache miss
+      store.fetch("rabbit", :force => true) {} # force cache miss
       store.fetch("rabbit", :force => true, :expires_in => 1.second) { @white_rabbit }
       store.fetch("rabbit").must_equal(@white_rabbit)
       sleep 2
