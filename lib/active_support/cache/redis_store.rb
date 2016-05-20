@@ -92,6 +92,7 @@ module ActiveSupport
       #   cache.read_multi "rabbit", "white-rabbit"
       #   cache.read_multi "rabbit", "white-rabbit", :raw => true
       def read_multi(*names)
+        return {} if names == []
         options = names.extract_options!
         keys = names.map{|name| normalize_key(name, options)}
         values = with { |c| c.mget(*keys) }
@@ -106,6 +107,7 @@ module ActiveSupport
       end
 
       def fetch_multi(*names)
+        return {} if names == []
         results = read_multi(*names)
         options = names.extract_options!
         fetched = {}
