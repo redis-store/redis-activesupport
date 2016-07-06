@@ -3,7 +3,7 @@ $:.push File.expand_path('../lib', __FILE__)
 
 Gem::Specification.new do |s|
   s.name        = 'redis-activesupport'
-  s.version     = '5.0.0'
+  s.version     = '5.0.1'
   s.authors     = ['Luca Guidi', 'Ryan Bigg']
   s.email       = ['me@lucaguidi.com', 'me@ryanbigg.com']
   s.homepage    = 'http://redis-store.org/redis-activesupport'
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_runtime_dependency 'redis-store',   '~> 1.2.0.pre'
+  s.add_runtime_dependency 'redis-store',   '~> 1.2.0'
   s.add_runtime_dependency 'activesupport', '>= 3', '< 6'
 
   s.add_development_dependency 'rake',     '~> 10'
