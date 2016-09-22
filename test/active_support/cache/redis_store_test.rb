@@ -56,6 +56,20 @@ describe ActiveSupport::Cache::RedisStore do
     redis.exists("rabbit").must_equal(true)
   end
 
+  it "connects using the passed hash of options" do
+    address = { host: '127.0.0.1', port: '6380', db: '1' }.merge(pool_size: 5, pool_timeout: 10)
+    store = ActiveSupport::Cache::RedisStore.new(address)
+    redis = Redis.new(url: "redis://127.0.0.1:6380/1")
+    redis.flushall
+    address[:db] = '0' # Should not use this db
+
+    store.data.class.must_equal(::ConnectionPool)
+
+    store.write("rabbit", 0)
+
+    redis.exists("rabbit").must_equal(true)
+  end
+
   it "raises an error if :pool isn't a pool" do
     assert_raises(RuntimeError, 'pool must be an instance of ConnectionPool') do
       ActiveSupport::Cache::RedisStore.new(pool: 'poolio')
