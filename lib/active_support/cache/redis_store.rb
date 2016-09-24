@@ -112,9 +112,6 @@ module ActiveSupport
         values = with { |c| c.mget(*keys) }
         values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
 
-        # Remove the options hash before mapping keys to values
-        names.extract_options!
-
         result = Hash[names.zip(values)]
         result.reject!{ |k,v| v.nil? }
         result
@@ -124,7 +121,6 @@ module ActiveSupport
         return {} if names == []
         results = read_multi(*names)
         options = names.extract_options!
-        fetched = {}
         need_writes = {}
 
         fetched = names.inject({}) do |memo, (name, _)|
