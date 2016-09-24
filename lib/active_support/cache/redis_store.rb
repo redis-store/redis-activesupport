@@ -63,10 +63,13 @@ module ActiveSupport
 
       # Delete objects for matched keys.
       #
+      # Uses SCAN to iterate and collect matched keys only when both client and
+      # server supports it (Redis server >= 2.8.0, client >= 3.0.6)
+      #
       # Performance note: this operation can be dangerous for large production
-      # databases, as it uses the Redis "KEYS" command, which is O(N) over the
-      # total number of keys in the database. Users of large Redis caches should
-      # avoid this method.
+      # databases on Redis < 2.8.0, as it uses the Redis "KEYS" command, which
+      # is O(N) over the total number of keys in the database. Users of large
+      # Redis caches should avoid this method.
       #
       # Example:
       #   cache.delete_matched "rab*"
@@ -76,7 +79,17 @@ module ActiveSupport
           matcher = key_matcher(matcher, options)
           begin
             with do |store|
-              !(keys = store.keys(matcher)).empty? && store.del(*keys)
+              supports_scan_each = store.respond_to?(:supports_redis_version?) &&
+                store.supports_redis_version?("2.8.0") &&
+                store.respond_to?(:scan_each)
+
+              if supports_scan_each
+                keys = store.scan_each(match: matcher).to_a
+              else
+                keys = store.keys(matcher)
+              end
+
+              !keys.empty? && store.del(*keys)
             end
           rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
             raise if raise_errors?

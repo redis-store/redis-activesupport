@@ -204,8 +204,12 @@ describe ActiveSupport::Cache::RedisStore do
 
   it "deletes matched data" do
     with_store_management do |store|
+      store.write "rabbit2", @white_rabbit
+      store.write "rub-a-dub", "Flora de Cana"
       store.delete_matched "rabb*"
       store.read("rabbit").must_be_nil
+      store.read("rabbit2").must_be_nil
+      store.exist?("rub-a-dub").must_equal(true)
     end
   end
 
