@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_runtime_dependency 'redis-store',   '~> 1.2.0'
+  s.add_runtime_dependency 'redis-store',   '~> 1.3.0'
   s.add_runtime_dependency 'activesupport', '>= 3', '< 6'
 
   s.add_development_dependency 'rake',     '~> 10'
@@ -28,4 +28,3 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'connection_pool', '~> 2.2.0'
   s.add_development_dependency 'redis-store-testing'
 end
-
