@@ -279,7 +279,7 @@ describe ActiveSupport::Cache::RedisStore do
       store.read("raw-counter", :raw => true).to_i.must_equal(3)
     end
   end
-  
+
   it "decrements a raw key" do
     with_store_management do |store|
       assert store.write("raw-counter", 3, :raw => true)
@@ -348,6 +348,43 @@ describe ActiveSupport::Cache::RedisStore do
       store.delete("rabbit", namespace:'namespaced')
       store.fetch("rabbit", namespace:'namespaced'){@rabbit}.must_equal(@rabbit)
       store.read("rabbit", namespace:'namespaced').must_equal(@rabbit)
+    end
+  end
+
+  describe "race_condition_ttl on fetch" do
+    it "persist entry for longer than given ttl" do
+      options = { force: true, expires_in: 1.second, race_condition_ttl: 2.seconds }
+      @store.fetch("rabbit", options) { @rabbit }
+      sleep 1.1
+      @store.delete("rabbit").must_equal(1)
+    end
+
+    it "limits stampede time to read-write duration" do
+      first_rabbit = second_rabbit = nil
+      options = { force: true, expires_in: 1.second, race_condition_ttl: 2.seconds }
+      @store.fetch("rabbit", options) { @rabbit }
+      sleep 1
+
+      th1 = Thread.new do
+        first_rabbit = @store.fetch("rabbit", race_condition_ttl: 2) do
+          sleep 1
+          @white_rabbit
+        end
+      end
+
+      sleep 0.1
+
+      th2 = Thread.new do
+        second_rabbit = @store.fetch("rabbit") { @white_rabbit }
+      end
+
+      th1.join
+      th2.join
+
+      first_rabbit.must_equal(@white_rabbit)
+      second_rabbit.must_equal(@rabbit)
+
+      @store.fetch("rabbit").must_equal(@white_rabbit)
     end
   end
 
@@ -628,4 +665,3 @@ describe ActiveSupport::Cache::RedisStore do
        ActiveSupport::VERSION::MAJOR == 4 && ActiveSupport::VERSION::MINOR < 2
     end
 end
-

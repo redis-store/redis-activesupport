@@ -58,6 +58,9 @@ module ActiveSupport
         options = merged_options(options)
         instrument(:write, name, options) do |payload|
           entry = options[:raw].present? ? value : Entry.new(value, options)
+          if options[:expires_in].present? && options[:race_condition_ttl].present? && options[:raw].blank?
+            options[:expires_in] = options[:expires_in].to_f + options[:race_condition_ttl].to_f
+          end
           write_entry(normalize_key(name, options), entry, options)
         end
       end
@@ -296,4 +299,3 @@ module ActiveSupport
     end
   end
 end
-
