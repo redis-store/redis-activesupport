@@ -11,8 +11,6 @@ rvm:
   - 2.2.4
   - 2.3.0
   - ruby-head
-  - rbx-19mode
-  - jruby-19mode
   - jruby-head
 services:
   - redis-server
