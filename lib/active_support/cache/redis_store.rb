@@ -126,7 +126,7 @@ module ActiveSupport
         options = names.extract_options!
         need_writes = {}
 
-        fetched = names.inject({}) do |memo, (name, _)|
+        fetched = names.inject({}) do |memo, name|
           memo[name] = results.fetch(name) do
             value = yield name
             need_writes[name] = value
