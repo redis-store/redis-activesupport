@@ -176,7 +176,7 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
-  if RUBY_VERSION.match /1\.9/
+  if RUBY_VERSION.match(/1\.9/)
     it "reads raw data" do
       with_store_management do |store|
         result = store.read("rabbit", :raw => true)
@@ -221,6 +221,18 @@ describe ActiveSupport::Cache::RedisStore do
       store.write "rabbit2", @white_rabbit
       store.write "rub-a-dub", "Flora de Cana"
       store.delete_matched "rabb*"
+      store.read("rabbit").must_be_nil
+      store.read("rabbit2").must_be_nil
+      store.exist?("rub-a-dub").must_equal(true)
+    end
+  end
+
+  it 'deletes matched data with a regexp' do
+    with_store_management do |store|
+      store.write "rabbit2", @white_rabbit
+      store.write "rub-a-dub", "Flora de Cana"
+      store.delete_matched(/rabb*/)
+
       store.read("rabbit").must_be_nil
       store.read("rabbit2").must_be_nil
       store.exist?("rub-a-dub").must_equal(true)
