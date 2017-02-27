@@ -30,4 +30,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'connection_pool', '~> 2.2.0'
   s.add_development_dependency 'redis-store-testing'
   s.add_development_dependency 'appraisal', '~> 2.0'
+  s.add_development_dependency 'pry-byebug', '~> 3'
 end
