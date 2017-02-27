@@ -476,6 +476,22 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  describe "fetch_multi nested keys" do
+    it "reads existing keys and fills in anything missing" do
+      @store.write ["bourbon", "bourbon-extended"], "makers"
+
+      bourbon_key = ["bourbon", "bourbon-extended"]
+      rye_key = ["rye", "rye-extended"]
+
+      result = @store.fetch_multi(bourbon_key, rye_key) do |key|
+        "#{key}-was-missing"
+      end
+
+      result.must_equal({ bourbon_key => "makers", rye_key => "#{rye_key}-was-missing" })
+      @store.read(rye_key).must_equal("#{rye_key}-was-missing")
+    end
+  end
+
   describe "notifications" do
     it "notifies on #fetch" do
       with_notifications do
