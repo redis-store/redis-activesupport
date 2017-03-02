@@ -109,8 +109,9 @@ module ActiveSupport
       #   cache.read_multi "rabbit", "white-rabbit"
       #   cache.read_multi "rabbit", "white-rabbit", :raw => true
       def read_multi(*names)
-        return {} if names == []
         options = names.extract_options!
+        return {} if names == []
+
         keys = names.map{|name| normalize_key(name, options)}
         values = with { |c| c.mget(*keys) }
         values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
@@ -121,9 +122,10 @@ module ActiveSupport
       end
 
       def fetch_multi(*names)
-        return {} if names == []
-        results = read_multi(*names)
         options = names.extract_options!
+        return {} if names == []
+
+        results = read_multi(*names, options)
         need_writes = {}
 
         fetched = names.inject({}) do |memo, name|
