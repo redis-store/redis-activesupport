@@ -275,7 +275,6 @@ module ActiveSupport
           !!@options[:raise_errors]
         end
 
-
         # Add the namespace defined in the options to a pattern designed to match keys.
         #
         # This implementation is __different__ than ActiveSupport:
@@ -283,8 +282,10 @@ module ActiveSupport
         # only for strings with wildcards.
         def key_matcher(pattern, options)
           prefix = options[:namespace].is_a?(Proc) ? options[:namespace].call : options[:namespace]
+
+          pattern = pattern.inspect[1..-2] if pattern.is_a? Regexp
+
           if prefix
-            raise "Regexps aren't supported, please use string with wildcards." if pattern.is_a?(Regexp)
             "#{prefix}:#{pattern}"
           else
             pattern
