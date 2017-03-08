@@ -93,7 +93,7 @@ module ActiveSupport
       #   cache.read_multi "rabbit", "white-rabbit", :raw => true
       def read_multi(*names)
         # Remove the options hash before mapping keys to values
-        names.extract_options!
+        options = names.extract_options!
         return {} if names == []
 
         keys = names.map{|name| namespaced_key(name, options)}
@@ -109,7 +109,7 @@ module ActiveSupport
         options = names.extract_options!
         return {} if names == []
 
-        results = read_multi(*names)
+        results = read_multi(*names, options)
         fetched = {}
 
         with do |c|

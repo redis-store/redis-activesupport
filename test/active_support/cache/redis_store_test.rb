@@ -313,6 +313,16 @@ describe ActiveSupport::Cache::RedisStore do
     result['namespaced:irish whisky'].must_equal("Jameson")
   end
 
+  it "read_multi return an empty {} when given an empty array" do
+    result = @store.read_multi(*[])
+    result.must_equal({})
+  end
+
+  it "read_multi return an empty {} when given an empty array with option" do
+    result = @store.read_multi(*[], option: true)
+    result.must_equal({})
+  end
+
   describe "fetch_multi" do
     it "reads existing keys and fills in anything missing" do
       @store.write "bourbon", "makers"
@@ -323,6 +333,16 @@ describe ActiveSupport::Cache::RedisStore do
 
       result.must_equal({ "bourbon" => "makers", "rye" => "rye-was-missing" })
       @store.read("rye").must_equal("rye-was-missing")
+    end
+
+    it "return an empty {} when given an empty array" do
+      result = @store.fetch_multi(*[]) { 1 }
+      result.must_equal({})
+    end
+
+    it "return an empty {} when given an empty array with option" do
+      result = @store.fetch_multi(*[], option: true)
+      result.must_equal({})
     end
   end
 
