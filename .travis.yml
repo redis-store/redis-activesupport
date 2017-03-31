@@ -16,5 +16,6 @@ services:
   - redis-server
 matrix:
   allow_failures:
+    - rvm: rbx-19mode
     - rvm: jruby-head
     - rvm: ruby-head
