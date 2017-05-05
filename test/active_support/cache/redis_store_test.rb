@@ -377,7 +377,7 @@ describe ActiveSupport::Cache::RedisStore do
       refute @store.cas('not_exist') { |_value| flunk }
     end
 
-    it "sets expirey" do
+    it "sets expiry" do
       @store.cas('foo', expires_in: 1.second) do |value|
         'bar'
       end
@@ -440,7 +440,7 @@ describe ActiveSupport::Cache::RedisStore do
       assert_equal({ 'foo' => 'baz', 'fud' => 'biz' }, @store.read_multi('foo', 'fud'))
     end
 
-    it 'sets expirey' do
+    it 'sets expiry' do
       @store.cas_multi('foo', expires_in: 1.second) do |_|
         { 'foo' => 'bar' }
       end

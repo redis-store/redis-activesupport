@@ -174,7 +174,7 @@ module ActiveSupport
 
       # The memcache store implementation of this does this in one command.
       # The tested behaviour is such that the command will lock per key - one
-      # conflcit should not fail the whole set, just the conflicted key.
+      # conflict should not fail the whole set, just the conflicted key.
       def cas_multi(*names)
         options = merged_options(names.extract_options!)
         return false if names.empty?
