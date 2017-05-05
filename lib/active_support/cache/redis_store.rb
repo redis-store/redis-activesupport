@@ -163,6 +163,7 @@ module ActiveSupport
                 new_entry = yield entry.value
                 result = c.multi { write key, new_entry, options }
               else
+                c.unwatch
                 result = false
               end
             end
@@ -178,13 +179,11 @@ module ActiveSupport
         options = merged_options(names.extract_options!)
         return false if names.empty?
         instrument(:cas_multi, names, options) do
-          with do
-            current_entries = read_multi(*names, options)
-            new_entries = yield current_entries
-            return new_entries.map do |k, v|
-              set_unless_changed(k, v, current_entries[k], options)
-            end.any? || new_entries.empty?
-          end
+          current_entries = read_multi(*names, options)
+          new_entries = yield current_entries
+          return new_entries.map do |k, v|
+            set_unless_changed(k, v, current_entries[k], options)
+          end.any? || new_entries.empty?
         end
       end
 
@@ -296,6 +295,8 @@ module ActiveSupport
                 c.multi do
                   write(key, new_value, options)
                 end
+              else
+                c.unwatch
               end
             end
           end
@@ -345,8 +346,6 @@ module ActiveSupport
         end
 
       private
-
-
 
         if ActiveSupport::VERSION::MAJOR < 5
           def normalize_key(*args)
