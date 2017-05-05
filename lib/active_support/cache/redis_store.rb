@@ -149,6 +149,45 @@ module ActiveSupport
         fetched
       end
 
+      # Performs a CAS operation (like MemcachedStore) using a watch,
+      # ensuring an optimistic lock on the given name
+      def cas(name, options = nil)
+        options = merged_options(options)
+        key = normalize_key(name, options)
+        result = false
+        instrument(:cas, name, options) do
+          with do |c|
+            c.watch(key) do
+              entry = read_entry(key, options)
+              if entry
+                new_entry = yield entry.value
+                result = c.multi { write key, new_entry, options }
+              else
+                result = false
+              end
+            end
+          end
+        end
+        result
+      end
+
+      # The memcache store implementation of this does this in one command.
+      # The tested behaviour is such that the command will lock per key - one
+      # conflcit should not fail the whole set, just the conflicted key.
+      def cas_multi(*names)
+        options = merged_options(names.extract_options!)
+        return false if names.empty?
+        instrument(:cas_multi, names, options) do
+          with do
+            current_entries = read_multi(*names, options)
+            new_entries = yield current_entries
+            return new_entries.map do |k, v|
+              set_unless_changed(k, v, current_entries[k], options)
+            end.any? || new_entries.empty?
+          end
+        end
+      end
+
       # Increment a key in the store.
       #
       # If the key doesn't exist it will be initialized on 0.
@@ -249,6 +288,19 @@ module ActiveSupport
           false
         end
 
+        def set_unless_changed(key, new_value, old_value, options)
+          with do |c|
+            c.watch(key) do
+              current_entry = read_entry(key, options)
+              if !old_value || current_entry.value == old_value
+                c.multi do
+                  write(key, new_value, options)
+                end
+              end
+            end
+          end
+        end
+
         def read_entry(key, options)
           entry = with { |c| c.get key, options }
           if entry
@@ -293,6 +345,8 @@ module ActiveSupport
         end
 
       private
+
+
 
         if ActiveSupport::VERSION::MAJOR < 5
           def normalize_key(*args)
