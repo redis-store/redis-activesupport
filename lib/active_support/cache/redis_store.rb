@@ -164,7 +164,6 @@ module ActiveSupport
                 result = c.multi { write key, new_entry, options }
               else
                 c.unwatch
-                result = false
               end
             end
           end
@@ -297,6 +296,7 @@ module ActiveSupport
                 end
               else
                 c.unwatch
+                return false
               end
             end
           end

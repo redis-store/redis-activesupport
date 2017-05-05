@@ -414,6 +414,19 @@ describe ActiveSupport::Cache::RedisStore do
       assert_equal({ 'foo' => 'bad', 'fud' => 'buz' }, @store.read_multi('foo', 'fud'))
     end
 
+    it "full conflict" do
+      @store.write('foo', 'bar')
+      @store.write('fud', 'biz')
+      result = @store.cas_multi('foo', 'fud') do |hash|
+        assert_equal({ 'foo' => 'bar', 'fud' => 'biz' }, hash)
+        @store.write('foo', 'bad')
+        @store.write('fud', 'tiz')
+        { 'foo' => 'baz', 'fud' => 'buz' }
+      end
+      refute result
+      assert_equal({ 'foo' => 'bad', 'fud' => 'tiz' }, @store.read_multi('foo', 'fud'))
+    end
+
     it 'cache miss' do
       assert(@store.cas_multi('not_exist') do |hash|
         assert hash.empty?
