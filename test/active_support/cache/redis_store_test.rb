@@ -363,6 +363,107 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
+  describe 'cas' do
+    it 'performs a write' do
+      @store.write('foo', nil)
+      assert(@store.cas('foo') do |value|
+        assert_nil value
+        'bar'
+      end)
+      assert_equal 'bar', @store.read('foo')
+    end
+
+    it 'performs a cache miss' do
+      refute @store.cas('not_exist') { |_value| flunk }
+    end
+
+    it "sets expiry" do
+      @store.cas('foo', expires_in: 1.second) do |value|
+        'bar'
+      end
+      assert_equal 'bar', @store.read('foo')
+      sleep(1.1)
+      assert_nil @store.read('foo')
+    end
+  end
+
+  describe 'cas multi' do
+    it 'performs an update' do
+      @store.write('foo', 'bar')
+      @store.write('fud', 'biz')
+      assert_equal true, (@store.cas_multi('foo', 'fud') do |hash|
+        assert_equal({ 'foo' => 'bar', 'fud' => 'biz' }, hash)
+        { 'foo' => 'baz', 'fud' => 'buz' }
+      end)
+      assert_equal({ 'foo' => 'baz', 'fud' => 'buz' }, @store.read_multi('foo', 'fud'))
+    end
+
+    it 'empty set' do
+      refute @store.cas_multi { |_hash| flunk }
+    end
+
+    it 'partial conflict' do
+      @store.write('foo', 'bar')
+      @store.write('fud', 'biz')
+      result = @store.cas_multi('foo', 'fud') do |hash|
+        assert_equal({ 'foo' => 'bar', 'fud' => 'biz' }, hash)
+        @store.write('foo', 'bad')
+        { 'foo' => 'baz', 'fud' => 'buz' }
+      end
+      assert result
+      assert_equal({ 'foo' => 'bad', 'fud' => 'buz' }, @store.read_multi('foo', 'fud'))
+    end
+
+    it "full conflict" do
+      @store.write('foo', 'bar')
+      @store.write('fud', 'biz')
+      result = @store.cas_multi('foo', 'fud') do |hash|
+        assert_equal({ 'foo' => 'bar', 'fud' => 'biz' }, hash)
+        @store.write('foo', 'bad')
+        @store.write('fud', 'tiz')
+        { 'foo' => 'baz', 'fud' => 'buz' }
+      end
+      refute result
+      assert_equal({ 'foo' => 'bad', 'fud' => 'tiz' }, @store.read_multi('foo', 'fud'))
+    end
+
+    it 'cache miss' do
+      assert(@store.cas_multi('not_exist') do |hash|
+        assert hash.empty?
+        {}
+      end)
+    end
+
+    it 'partial miss' do
+      @store.write('foo', 'baz')
+      assert(@store.cas_multi('foo', 'bar') do |hash|
+        assert_equal({ 'foo' => 'baz' }, hash)
+        {}
+      end)
+      assert_equal 'baz', @store.read('foo')
+    end
+
+    it 'partial update' do
+      @store.write('foo', 'bar')
+      @store.write('fud', 'biz')
+      assert(@store.cas_multi('foo', 'fud') do |hash|
+        assert_equal({ 'foo' => 'bar', 'fud' => 'biz' }, hash)
+        { 'foo' => 'baz' }
+      end)
+      assert_equal({ 'foo' => 'baz', 'fud' => 'biz' }, @store.read_multi('foo', 'fud'))
+    end
+
+    it 'sets expiry' do
+      @store.cas_multi('foo', expires_in: 1.second) do |_|
+        { 'foo' => 'bar' }
+      end
+      assert_equal 'bar', @store.read('foo')
+      sleep(1.1)
+      assert_nil @store.read('foo')
+    end
+  end
+
+
   describe "race_condition_ttl on fetch" do
     it "persist entry for longer than given ttl" do
       options = { force: true, expires_in: 1.second, race_condition_ttl: 2.seconds }
