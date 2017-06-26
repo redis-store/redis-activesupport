@@ -432,6 +432,14 @@ describe ActiveSupport::Cache::RedisStore do
     result.must_equal({})
   end
 
+  it "read_multi returns values with raw option" do
+    @store.write "raw-value-a", "A", raw: true
+    @store.write "raw-value-b", "B", raw: true
+
+    result = @store.read_multi("raw-value-a", "raw-value-b", :raw => true)
+    result.must_equal({ "raw-value-a" => "A", "raw-value-b" => "B" })
+  end
+
   describe "fetch_multi" do
     it "reads existing keys and fills in anything missing" do
       @store.write "bourbon", "makers"
