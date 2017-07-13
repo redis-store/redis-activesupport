@@ -5,14 +5,13 @@ gemfile:
   - gemfiles/Gemfile.activesupport-4.x
   - gemfiles/Gemfile.activesupport-5.x
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.5
-  - 2.2.4
-  - 2.3.0
+  - 2.0
+  - 2.1
+  - 2.2
+  - 2.3
+  - 2.4
   - ruby-head
   - jruby-head
-  - 2.4.1
 services:
   - redis-server
 matrix:
