@@ -18,13 +18,7 @@ matrix:
   allow_failures:
     - rvm: jruby-head
     - rvm: ruby-head
-    - rvm: 1.9.3
+    - rvm: 2.0
       gemfile: gemfiles/Gemfile.activesupport-5.x
-    - rvm: 2.0.0
-      gemfile: gemfiles/Gemfile.activesupport-5.x
-    - rvm: 2.1.5
-      gemfile: gemfiles/Gemfile.activesupport-5.x
-    - rvm: rbx-19mode
-      gemfile: gemfiles/Gemfile.activesupport-5.x
-    - rvm: jruby-19mode
+    - rvm: 2.1
       gemfile: gemfiles/Gemfile.activesupport-5.x
