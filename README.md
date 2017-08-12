@@ -1,7 +1,5 @@
 # Redis stores for ActiveSupport
 
-[![Build Status](https://travis-ci.org/redis-store/redis-activesupport.svg?branch=master)](https://travis-ci.org/redis-store/redis-activesupport)
-
 __`redis-activesupport`__ provides a cache for __ActiveSupport__. See the main [redis-store readme](https://github.com/redis-store/redis-store) for general guidelines.
 
 ## Installation
