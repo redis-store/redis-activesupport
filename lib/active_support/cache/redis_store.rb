@@ -103,12 +103,14 @@ module ActiveSupport
         args = [keys, options]
         args.flatten!
 
-        values = with { |c| c.mget(*args) }
-        values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
+        instrument(:read_multi, names) do |payload|
+          values = with { |c| c.mget(*args) }
+          values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
 
-        result = Hash[names.zip(values)]
-        result.reject!{ |k,v| v.nil? }
-        result
+          Hash[names.zip(values)].reject{|k,v| v.nil?}.tap do |result|
+            payload[:hits] = result.keys if payload
+          end
+        end
       end
 
       def fetch_multi(*names)
