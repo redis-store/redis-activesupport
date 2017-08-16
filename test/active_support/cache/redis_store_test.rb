@@ -585,6 +585,18 @@ describe ActiveSupport::Cache::RedisStore do
       exist.payload.must_equal({ :key => 'the smiths' })
     end
 
+    it "notifies on #read_multi" do
+      @store.write "depeche mode", "Enjoy The Silence"
+
+      with_notifications do
+        @store.read_multi "metallica", "depeche mode"
+      end
+
+      read = @events.first
+      read.name.must_equal('cache_read_multi.active_support')
+      read.payload.must_equal({ :key => ["metallica", "depeche mode"], :hits => ["depeche mode"] })
+    end
+
     it "notifies on #delete_matched" do
       with_notifications do
         @store.delete_matched "afterhours*"
