@@ -91,6 +91,11 @@ describe ActiveSupport::Cache::RedisStore do
     underlying_store.must_be_instance_of(::Redis::Store)
   end
 
+  it "creates a normal store when given nil" do
+    underlying_store = instantiate_store nil
+    underlying_store.must_be_instance_of(::Redis::Store)
+  end
+
   it "creates a normal store when given options only" do
     underlying_store = instantiate_store(:expires_in => 1.second)
     underlying_store.must_be_instance_of(::Redis::Store)
