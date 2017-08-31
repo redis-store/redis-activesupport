@@ -70,6 +70,12 @@ describe ActiveSupport::Cache::RedisStore do
     redis.exists("rabbit").must_equal(true)
   end
 
+  it "does not raise an error if address is nil" do
+    assert_nothing_raised do
+      ActiveSupport::Cache::RedisStore.new(nil)
+    end
+  end
+
   it "raises an error if :pool isn't a pool" do
     assert_raises(RuntimeError, 'pool must be an instance of ConnectionPool') do
       ActiveSupport::Cache::RedisStore.new(pool: 'poolio')
