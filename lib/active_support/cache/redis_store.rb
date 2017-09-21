@@ -111,6 +111,9 @@ module ActiveSupport
             payload[:hits] = result.keys if payload
           end
         end
+      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+        raise if raise_errors?
+        {}
       end
 
       def fetch_multi(*names)
@@ -130,12 +133,16 @@ module ActiveSupport
           memo
         end
 
-        with do |c|
-          c.multi do
-            need_writes.each do |name, value|
-              write(name, value, options)
+        begin
+          with do |c|
+            c.multi do
+              need_writes.each do |name, value|
+                write(name, value, options)
+              end
             end
           end
+        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+          raise if raise_errors?
         end
 
         fetched
