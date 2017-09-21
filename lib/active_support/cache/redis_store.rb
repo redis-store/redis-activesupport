@@ -4,6 +4,13 @@ require 'redis-store'
 module ActiveSupport
   module Cache
     class RedisStore < Store
+
+      ERRORS_TO_RESCUE = [
+        Errno::ECONNREFUSED,
+        Errno::EHOSTUNREACH,
+        Redis::CannotConnectError
+      ].freeze
+
       attr_reader :data
 
       # Instantiate the store.
@@ -82,7 +89,7 @@ module ActiveSupport
             with do |store|
               !(keys = store.keys(matcher)).empty? && store.del(*keys)
             end
-          rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+          rescue *ERRORS_TO_RESCUE
             raise if raise_errors?
             false
           end
@@ -111,7 +118,7 @@ module ActiveSupport
             payload[:hits] = result.keys if payload
           end
         end
-      rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+      rescue *ERRORS_TO_RESCUE
         raise if raise_errors?
         {}
       end
@@ -141,7 +148,7 @@ module ActiveSupport
               end
             end
           end
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+        rescue *ERRORS_TO_RESCUE
           raise if raise_errors?
         end
 
@@ -243,7 +250,7 @@ module ActiveSupport
         def write_entry(key, entry, options)
           method = options && options[:unless_exist] ? :setnx : :set
           with { |client| client.send method, key, entry, options }
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+        rescue *ERRORS_TO_RESCUE
           raise if raise_errors?
           false
         end
@@ -253,7 +260,7 @@ module ActiveSupport
           if entry
             entry.is_a?(ActiveSupport::Cache::Entry) ? entry : ActiveSupport::Cache::Entry.new(entry)
           end
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+        rescue *ERRORS_TO_RESCUE
           raise if raise_errors?
           nil
         end
@@ -265,7 +272,7 @@ module ActiveSupport
         #
         def delete_entry(key, options)
           with { |c| c.del key }
-        rescue Errno::ECONNREFUSED, Errno::EHOSTUNREACH, Redis::CannotConnectError
+        rescue *ERRORS_TO_RESCUE
           raise if raise_errors?
           false
         end
