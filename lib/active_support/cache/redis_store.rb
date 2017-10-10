@@ -8,7 +8,8 @@ module ActiveSupport
       ERRORS_TO_RESCUE = [
         Errno::ECONNREFUSED,
         Errno::EHOSTUNREACH,
-        Redis::CannotConnectError
+        Redis::CannotConnectError,
+        Redis::ConnectionError
       ].freeze
 
       attr_reader :data
