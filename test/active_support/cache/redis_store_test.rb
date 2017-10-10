@@ -652,6 +652,20 @@ describe ActiveSupport::Cache::RedisStore do
       end
     end
 
+    it "raises on read_multi when redis is unavailable" do
+      assert_raises(Redis::CannotConnectError) do
+        @raise_error_store.read_multi("rabbit", "white-rabbit")
+      end
+    end
+
+    it "raises on fetch_multi when redis is unavailable" do
+      assert_raises(Redis::CannotConnectError) do
+        @raise_error_store.fetch_multi("rabbit", "white-rabbit") do |key|
+          key.upcase
+        end
+      end
+    end
+
     it "raises on writes when redis is unavailable" do
       assert_raises(Redis::CannotConnectError) do
         @raise_error_store.write "rabbit", @white_rabbit, :expires_in => 1.second
@@ -677,8 +691,21 @@ describe ActiveSupport::Cache::RedisStore do
       @raise_error_store.stubs(:with).raises(Redis::CannotConnectError)
     end
 
-    it "is nil when redis is unavailable" do
+    it "returns nil from read when redis is unavailable" do
       @raise_error_store.read("rabbit").must_be_nil
+    end
+
+    it "returns empty hash from read_multi when redis is unavailable" do
+      @raise_error_store.read_multi("rabbit", "white-rabbit").must_equal({})
+    end
+
+    it "returns result hash from fetch_multi when redis is unavailable" do
+      @raise_error_store.fetch_multi("rabbit", "white-rabbit") do |key|
+        key.upcase
+      end.must_equal({
+        "rabbit" => "RABBIT",
+        "white-rabbit" => "WHITE-RABBIT",
+      })
     end
 
     it "returns false when redis is unavailable" do
