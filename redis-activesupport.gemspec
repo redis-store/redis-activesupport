@@ -1,9 +1,11 @@
 # -*- encoding: utf-8 -*-
 $:.push File.expand_path('../lib', __FILE__)
 
+require 'redis/active_support/version'
+
 Gem::Specification.new do |s|
   s.name        = 'redis-activesupport'
-  s.version     = '5.0.3'
+  s.version     = Redis::ActiveSupport::VERSION
   s.authors     = ['Luca Guidi', 'Ryan Bigg']
   s.email       = ['me@lucaguidi.com', 'me@ryanbigg.com']
   s.homepage    = 'http://redis-store.org/redis-activesupport'
