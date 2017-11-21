@@ -8,6 +8,7 @@ module ActiveSupport
       ERRORS_TO_RESCUE = [
         Errno::ECONNREFUSED,
         Errno::EHOSTUNREACH,
+        Redis::CommandError,
         Redis::CannotConnectError,
         Redis::ConnectionError
       ].freeze
