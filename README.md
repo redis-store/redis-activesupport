@@ -2,6 +2,15 @@
 
 __`redis-activesupport`__ provides a cache for __ActiveSupport__. See the main [redis-store readme](https://github.com/redis-store/redis-store) for general guidelines.
 
+## A quick note about Rails 5.2
+
+Rails 5.2.0 [includes a Redis cache store out of the
+box](https://github.com/rails/rails/pull/31134), so you don't really
+need this gem anymore if you're generating a new Rails application.
+Maintenence on the redis-rails, redis-actionpack, and
+redis-activesupport gems will continue for security and compatibility
+issues, but we are no longer accepting new features for pull request.
+
 ## Installation
 
 ```ruby
