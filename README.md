@@ -1,6 +1,13 @@
 # Redis stores for ActiveSupport
 
-__`redis-activesupport`__ provides a cache for __ActiveSupport__. See the main [redis-store readme](https://github.com/redis-store/redis-store) for general guidelines.
+__`redis-activesupport`__ provides a cache for __ActiveSupport__. 
+
+
+For guidelines on using our underlying cache store, see the main [redis-store readme](https://github.com/redis-store/redis-store).
+
+For information on how to use this library in a Rails app, see the [documentation for redis-rails](https://github.com/redis-store/redis-rails).
+
+If, for some reason, you're using `ActiveSupport::Cache` and not in a Rails app, read on to learn how to install/use this gem by itself!
 
 ## Installation
 
