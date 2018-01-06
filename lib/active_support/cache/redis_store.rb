@@ -43,7 +43,7 @@ module ActiveSupport
       #     # => supply an existing connection pool (e.g. for use with redis-sentinel or redis-failover)
       def initialize(*addresses)
         @options = addresses.dup.extract_options!
-        addresses = addresses.map(&:dup)
+        addresses = addresses.compact.map(&:dup)
 
         @data = if @options[:pool]
                   raise "pool must be an instance of ConnectionPool" unless @options[:pool].is_a?(ConnectionPool)
