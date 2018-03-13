@@ -20,6 +20,9 @@ module ActiveSupport
       #   RedisStore.new
       #     # => host: localhost,   port: 6379,  db: 0
       #
+      #   RedisStore.new client: Redis.new(url: "redis://127.0.0.1:6380/1")
+      #     # => host: localhost,   port: 6379,  db: 0
+      #
       #   RedisStore.new "example.com"
       #     # => host: example.com, port: 6379,  db: 0
       #
@@ -55,6 +58,8 @@ module ActiveSupport
                   pool_options[:timeout] = options[:pool_timeout] if options[:pool_timeout]
                   @pooled = true
                   ::ConnectionPool.new(pool_options) { ::Redis::Store::Factory.create(*addresses, @options) }
+                elsif @options[:client]
+                  @options[:client]
                 else
                   ::Redis::Store::Factory.create(*addresses, @options)
                 end
