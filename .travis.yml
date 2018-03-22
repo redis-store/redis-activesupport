@@ -22,3 +22,6 @@ matrix:
       gemfile: gemfiles/Gemfile.activesupport-5.x
     - rvm: 2.1
       gemfile: gemfiles/Gemfile.activesupport-5.x
+notifications:
+  webhooks: https://www.travisbuddy.com/
+  on_success: never
