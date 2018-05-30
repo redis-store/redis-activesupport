@@ -9,6 +9,14 @@ For information on how to use this library in a Rails app, see the [documentatio
 
 If, for some reason, you're using `ActiveSupport::Cache` and not in a Rails app, read on to learn how to install/use this gem by itself!
 
+## A quick note about Rails 5.2
+
+Rails 5.2.0 [includes a Redis cache store out of the
+box](https://github.com/rails/rails/pull/31134), so you don't really
+need this anymore if you're generating a new Rails application. We
+are no longer accepting new features for this gem, only pull requests
+for security and compatibility fixes will be accepted.
+
 ## Installation
 
 ```ruby
