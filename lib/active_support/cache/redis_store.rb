@@ -9,7 +9,8 @@ module ActiveSupport
         Errno::ECONNREFUSED,
         Errno::EHOSTUNREACH,
         Redis::CannotConnectError,
-        Redis::ConnectionError
+        Redis::ConnectionError,
+        Errno::EINVAL
       ].freeze
 
       attr_reader :data
