@@ -70,10 +70,10 @@ module ActiveSupport
       def write(name, value, options = nil)
         options = merged_options(options)
         instrument(:write, name, options) do |payload|
-          entry = options[:raw].present? ? value : Entry.new(value, options)
           if options[:expires_in].present? && options[:race_condition_ttl].present? && options[:raw].blank?
             options[:expires_in] = options[:expires_in].to_f + options[:race_condition_ttl].to_f
           end
+          entry = options[:raw].present? ? value : Entry.new(value, options)
           write_entry(normalize_key(name, options), entry, options)
         end
       end
@@ -305,7 +305,6 @@ module ActiveSupport
         end
 
       private
-
         if ActiveSupport::VERSION::MAJOR < 5
           def normalize_key(*args)
             namespaced_key(*args)
