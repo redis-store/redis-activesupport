@@ -8,8 +8,9 @@ module ActiveSupport
       ERRORS_TO_RESCUE = [
         Errno::ECONNREFUSED,
         Errno::EHOSTUNREACH,
-        Redis::CannotConnectError,
-        Redis::ConnectionError
+        # This is what rails' redis cache store rescues
+        # https://github.com/rails/rails/blob/5-2-stable/activesupport/lib/active_support/cache/redis_cache_store.rb#L447
+        Redis::BaseConnectionError
       ].freeze
 
       attr_reader :data
