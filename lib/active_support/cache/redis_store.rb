@@ -13,6 +13,12 @@ module ActiveSupport
         Redis::BaseConnectionError
       ].freeze
 
+      DEFAULT_ERROR_HANDLER = -> (method: nil, returning: nil, exception: nil) do
+        if logger
+          logger.error { "RedisStore: #{method} failed, returned #{returning.inspect}: #{exception.class}: #{exception.message}" }
+        end
+      end
+
       attr_reader :data
 
       # Instantiate the store.
@@ -65,6 +71,8 @@ module ActiveSupport
                   ::Redis::Store::Factory.create(*addresses, @options)
                 end
 
+        @error_handler = @options[:error_handler] || DEFAULT_ERROR_HANDLER
+
         super(@options)
       end
 
@@ -91,14 +99,13 @@ module ActiveSupport
       def delete_matched(matcher, options = nil)
         options = merged_options(options)
         instrument(:delete_matched, matcher.inspect) do
-          matcher = key_matcher(matcher, options)
-          begin
-            with do |store|
-              !(keys = store.keys(matcher)).empty? && store.del(*keys)
+          failsafe(:read_multi, returning: false) do
+            matcher = key_matcher(matcher, options)
+            begin
+              with do |store|
+                !(keys = store.keys(matcher)).empty? && store.del(*keys)
+              end
             end
-          rescue *ERRORS_TO_RESCUE
-            raise if raise_errors?
-            false
           end
         end
       end
@@ -118,16 +125,15 @@ module ActiveSupport
         args.flatten!
 
         instrument(:read_multi, names) do |payload|
-          values = with { |c| c.mget(*args) }
-          values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
+          failsafe(:read_multi, returning: {}) do
+            values = with { |c| c.mget(*args) }
+            values.map! { |v| v.is_a?(ActiveSupport::Cache::Entry) ? v.value : v }
 
-          Hash[names.zip(values)].reject{|k,v| v.nil?}.tap do |result|
-            payload[:hits] = result.keys if payload
+            Hash[names.zip(values)].reject{|k,v| v.nil?}.tap do |result|
+              payload[:hits] = result.keys if payload
+            end
           end
         end
-      rescue *ERRORS_TO_RESCUE
-        raise if raise_errors?
-        {}
       end
 
       def fetch_multi(*names)
@@ -147,7 +153,7 @@ module ActiveSupport
           memo
         end
 
-        begin
+        failsafe(:fetch_multi_write) do
           with do |c|
             c.multi do
               need_writes.each do |name, value|
@@ -155,8 +161,6 @@ module ActiveSupport
               end
             end
           end
-        rescue *ERRORS_TO_RESCUE
-          raise if raise_errors?
         end
 
         fetched
@@ -186,7 +190,9 @@ module ActiveSupport
       def increment(key, amount = 1, options = {})
         options = merged_options(options)
         instrument(:increment, key, :amount => amount) do
-          with{|c| c.incrby normalize_key(key, options), amount}
+          failsafe(:increment) do
+            with{|c| c.incrby normalize_key(key, options), amount}
+          end
         end
       end
 
@@ -214,7 +220,9 @@ module ActiveSupport
       def decrement(key, amount = 1, options = {})
         options = merged_options(options)
         instrument(:decrement, key, :amount => amount) do
-          with{|c| c.decrby normalize_key(key, options), amount}
+          failsafe(:decrement) do
+            with{|c| c.decrby normalize_key(key, options), amount}
+          end
         end
       end
 
@@ -226,7 +234,9 @@ module ActiveSupport
       # Clear all the data from the store.
       def clear
         instrument(:clear, nil, nil) do
-          with(&:flushdb)
+          failsafe(:clear) do
+            with(&:flushdb)
+          end
         end
       end
 
@@ -255,20 +265,18 @@ module ActiveSupport
 
       protected
         def write_entry(key, entry, options)
-          method = options && options[:unless_exist] ? :setnx : :set
-          with { |client| client.send method, key, entry, options }
-        rescue *ERRORS_TO_RESCUE
-          raise if raise_errors?
-          false
+          failsafe(:write_entry, returning: false) do
+            method = options && options[:unless_exist] ? :setnx : :set
+            with { |client| client.send method, key, entry, options }
+          end
         end
 
         def read_entry(key, options)
-          entry = with { |c| c.get key, options }
-          return unless entry
-          entry.is_a?(Entry) ? entry : Entry.new(entry)
-        rescue *ERRORS_TO_RESCUE
-          raise if raise_errors?
-          nil
+          failsafe(:read_entry) do
+            entry = with { |c| c.get key, options }
+            return unless entry
+            entry.is_a?(Entry) ? entry : Entry.new(entry)
+          end
         end
 
         ##
@@ -277,10 +285,9 @@ module ActiveSupport
         # It's really needed and use
         #
         def delete_entry(key, options)
-          with { |c| c.del key }
-        rescue *ERRORS_TO_RESCUE
-          raise if raise_errors?
-          false
+          failsafe(:delete_entry, returning: false) do
+            with { |c| c.del key }
+          end
         end
 
         def raise_errors?
@@ -309,6 +316,22 @@ module ActiveSupport
           def normalize_key(*args)
             namespaced_key(*args)
           end
+        end
+
+        def failsafe(method, returning: nil)
+          yield
+        rescue ::Redis::BaseConnectionError => e
+          raise if raise_errors?
+          handle_exception(exception: e, method: method, returning: returning)
+          returning
+        end
+
+        def handle_exception(exception: nil, method: nil, returning: nil)
+          if @error_handler
+            @error_handler.(method: method, exception: exception, returning: returning)
+          end
+        rescue => failsafe
+          warn("RedisStore ignored exception in handle_exception: #{failsafe.class}: #{failsafe.message}\n  #{failsafe.backtrace.join("\n  ")}")
         end
     end
   end
