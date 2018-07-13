@@ -377,7 +377,7 @@ describe ActiveSupport::Cache::RedisStore do
 
   describe "race_condition_ttl on fetch" do
     it "persist entry for longer than given ttl" do
-      options = { force: true, expires_in: 1.second, race_condition_ttl: 2.seconds }
+      options = { force: true, expires_in: 1.second, race_condition_ttl: 2.seconds, version: Time.now.to_i }
       @store.fetch("rabbit", options) { @rabbit }
       sleep 1.1
       @store.delete("rabbit").must_equal(1)
@@ -385,12 +385,12 @@ describe ActiveSupport::Cache::RedisStore do
 
     it "limits stampede time to read-write duration" do
       first_rabbit = second_rabbit = nil
-      options = { force: true, expires_in: 1.second, race_condition_ttl: 2.seconds }
+      options = { force: true, expires_in: 1.second, race_condition_ttl: 2.seconds, version: Time.now.to_i }
       @store.fetch("rabbit", options) { @rabbit }
       sleep 1
 
       th1 = Thread.new do
-        first_rabbit = @store.fetch("rabbit", race_condition_ttl: 2) do
+        first_rabbit = @store.fetch("rabbit", options) do
           sleep 1
           @white_rabbit
         end
