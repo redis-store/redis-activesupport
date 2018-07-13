@@ -1,9 +1,5 @@
 language: ruby
 script: 'bundle exec rake'
-gemfile:
-  - gemfiles/Gemfile.activesupport-3.x
-  - gemfiles/Gemfile.activesupport-4.x
-  - gemfiles/Gemfile.activesupport-5.x
 rvm:
   - 2.0
   - 2.1
@@ -25,3 +21,10 @@ matrix:
 notifications:
   webhooks: https://www.travisbuddy.com/
   on_success: never
+# Put this in your .travis.yml
+gemfile:
+  - gemfiles/activesupport_3.gemfile
+  - gemfiles/activesupport_4.gemfile
+  - gemfiles/activesupport_50.gemfile
+  - gemfiles/activesupport_51.gemfile
+  - gemfiles/activesupport_52.gemfile

@@ -264,9 +264,8 @@ module ActiveSupport
 
         def read_entry(key, options)
           entry = with { |c| c.get key, options }
-          if entry
-            entry.is_a?(ActiveSupport::Cache::Entry) ? entry : ActiveSupport::Cache::Entry.new(entry)
-          end
+          return unless entry
+          entry.is_a?(Entry) ? entry : Entry.new(entry)
         rescue *ERRORS_TO_RESCUE
           raise if raise_errors?
           nil
