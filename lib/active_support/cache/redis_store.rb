@@ -103,7 +103,7 @@ module ActiveSupport
             matcher = key_matcher(matcher, options)
             begin
               with do |store|
-                !(keys = store.keys(matcher)).empty? && store.del(*keys)
+                !(keys = store.keys(matcher)).empty? && store.unlink(*keys)
               end
             end
           end
@@ -286,7 +286,7 @@ module ActiveSupport
         #
         def delete_entry(key, options)
           failsafe(:delete_entry, returning: false) do
-            with { |c| c.del key }
+            with { |c| c.unlink(key) }
           end
         end
 
