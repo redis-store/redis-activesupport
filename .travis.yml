@@ -29,6 +29,16 @@ matrix:
       gemfile: gemfiles/activesupport_52.gemfile
     - rvm: 2.1
       gemfile: gemfiles/activesupport_52.gemfile
+    - rvm: 2.0
+      gemfile: gemfiles/activesupport_6beta2.gemfile
+    - rvm: 2.1
+      gemfile: gemfiles/activesupport_6beta2.gemfile
+    - rvm: 2.2
+      gemfile: gemfiles/activesupport_6beta2.gemfile
+    - rvm: 2.3
+      gemfile: gemfiles/activesupport_6beta2.gemfile
+    - rvm: 2.4
+      gemfile: gemfiles/activesupport_6beta2.gemfile
 notifications:
   webhooks: https://www.travisbuddy.com/
   on_success: never
@@ -39,3 +49,4 @@ gemfile:
   - gemfiles/activesupport_50.gemfile
   - gemfiles/activesupport_51.gemfile
   - gemfiles/activesupport_52.gemfile
+  - gemfiles/activesupport_6beta2.gemfile
