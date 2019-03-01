@@ -17,3 +17,7 @@ end
 appraise 'activesupport_52' do
   gem 'activesupport', '~> 5.2.0'
 end
+
+appraise 'activesupport_6beta2' do
+  gem 'activesupport', '~> 6.0.0beta2'
+end
