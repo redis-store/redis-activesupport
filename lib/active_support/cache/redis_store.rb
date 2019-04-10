@@ -30,25 +30,25 @@ module ActiveSupport
       #   RedisStore.new client: Redis.new(url: "redis://127.0.0.1:6380/1")
       #     # => host: localhost,   port: 6379,  db: 0
       #
-      #   RedisStore.new "example.com"
+      #   RedisStore.new "redis://example.com"
       #     # => host: example.com, port: 6379,  db: 0
       #
-      #   RedisStore.new "example.com:23682"
+      #   RedisStore.new "redis://example.com:23682"
       #     # => host: example.com, port: 23682, db: 0
       #
-      #   RedisStore.new "example.com:23682/1"
+      #   RedisStore.new "redis://example.com:23682/1"
       #     # => host: example.com, port: 23682, db: 1
       #
-      #   RedisStore.new "example.com:23682/1/theplaylist"
+      #   RedisStore.new "redis://example.com:23682/1/theplaylist"
       #     # => host: example.com, port: 23682, db: 1, namespace: theplaylist
       #
-      #   RedisStore.new "localhost:6379/0", "localhost:6380/0"
+      #   RedisStore.new "redis://localhost:6379/0", "redis://localhost:6380/0"
       #     # => instantiate a cluster
       #
-      #   RedisStore.new "localhost:6379/0", "localhost:6380/0", pool_size: 5, pool_timeout: 10
+      #   RedisStore.new "redis://localhost:6379/0", "redis://localhost:6380/0", pool_size: 5, pool_timeout: 10
       #     # => use a ConnectionPool
       #
-      #   RedisStore.new "localhost:6379/0", "localhost:6380/0",
+      #   RedisStore.new "redis://localhost:6379/0", "redis://localhost:6380/0",
       #     pool: ::ConnectionPool.new(size: 1, timeout: 1) { ::Redis::Store::Factory.create("localhost:6379/0") })
       #     # => supply an existing connection pool (e.g. for use with redis-sentinel or redis-failover)
       def initialize(*addresses)
