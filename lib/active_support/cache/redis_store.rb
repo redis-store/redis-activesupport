@@ -273,7 +273,7 @@ module ActiveSupport
 
         def read_entry(key, options)
           failsafe(:read_entry) do
-            entry = with { |c| c.get key, options }
+            entry = with { |c| c.get key }
             return unless entry
             entry.is_a?(Entry) ? entry : Entry.new(entry)
           end
