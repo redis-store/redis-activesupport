@@ -1,39 +1,46 @@
 language: ruby
-script: 'bundle exec rake'
+script: bundle exec rake
 rvm:
-  - 2.0
-  - 2.1
-  - 2.2
-  - 2.3
-  - 2.4
-  - ruby-head
-  - jruby-head
+- 2.0
+- 2.1
+- 2.2
+- 2.3
+- 2.4
+- ruby-head
+- jruby-head
 services:
-  - redis-server
+- redis-server
 matrix:
   allow_failures:
-    - rvm: jruby-head
-    - rvm: ruby-head
+  - rvm: jruby-head
+  - rvm: ruby-head
   exclude:
-    - rvm: 2.0
-      gemfile: gemfiles/activesupport_50.gemfile
-    - rvm: 2.1
-      gemfile: gemfiles/activesupport_50.gemfile
-    - rvm: 2.0
-      gemfile: gemfiles/activesupport_51.gemfile
-    - rvm: 2.1
-      gemfile: gemfiles/activesupport_51.gemfile
-    - rvm: 2.0
-      gemfile: gemfiles/activesupport_52.gemfile
-    - rvm: 2.1
-      gemfile: gemfiles/activesupport_52.gemfile
+  - rvm: 2.0
+    gemfile: gemfiles/activesupport_50.gemfile
+  - rvm: 2.1
+    gemfile: gemfiles/activesupport_50.gemfile
+  - rvm: 2.0
+    gemfile: gemfiles/activesupport_51.gemfile
+  - rvm: 2.1
+    gemfile: gemfiles/activesupport_51.gemfile
+  - rvm: 2.0
+    gemfile: gemfiles/activesupport_52.gemfile
+  - rvm: 2.1
+    gemfile: gemfiles/activesupport_52.gemfile
 notifications:
   webhooks: https://www.travisbuddy.com/
   on_success: never
-# Put this in your .travis.yml
 gemfile:
-  - gemfiles/activesupport_3.gemfile
-  - gemfiles/activesupport_4.gemfile
-  - gemfiles/activesupport_50.gemfile
-  - gemfiles/activesupport_51.gemfile
-  - gemfiles/activesupport_52.gemfile
+- gemfiles/activesupport_3.gemfile
+- gemfiles/activesupport_4.gemfile
+- gemfiles/activesupport_50.gemfile
+- gemfiles/activesupport_51.gemfile
+- gemfiles/activesupport_52.gemfile
+deploy:
+  provider: rubygems
+  api_key:
+    secure: VHWLUgCtqlKjeS5uGOxS4tnEUSPiapyvBvgSpr+FUeQnjAE9jgJvz+rAmiNy/pp8fAhjH5FdyIUXuh2rE2sWcBYrOa1rCvrc7eBHdnpZ4U7ULJwQKhC/4dOE33ClaZX2pex4pv12I2218ZH5TsqdmQ0Ci0ccfNZJv0vs+IFP+kQ=
+  gem: redis-activesupport
+  on:
+    tags: true
+    repo: redis-store/redis-activesupport
