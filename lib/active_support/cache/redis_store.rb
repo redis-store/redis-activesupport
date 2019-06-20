@@ -66,6 +66,7 @@ module ActiveSupport
                   @pooled = true
                   ::ConnectionPool.new(pool_options) { ::Redis::Store::Factory.create(*addresses, @options) }
                 elsif @options[:client]
+                  raise ArgumentError, "client must be an instance of Redis::Store" unless @options[:client].is_a?(Redis::Store)
                   @options[:client]
                 else
                   ::Redis::Store::Factory.create(*addresses, @options)

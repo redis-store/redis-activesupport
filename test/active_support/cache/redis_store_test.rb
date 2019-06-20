@@ -27,7 +27,7 @@ describe ActiveSupport::Cache::RedisStore do
   end
 
   it "uses redis client passed as an option" do
-    redis = Redis.new(url: "redis://127.0.0.1:6380/1")
+    redis = Redis::Store.new(url: "redis://127.0.0.1:6380/1")
     store = ActiveSupport::Cache::RedisStore.new(client: redis)
 
     store.data.must_equal(redis)
