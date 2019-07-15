@@ -187,11 +187,17 @@ module ActiveSupport
       #
       #   cache.increment "rabbit"
       #   cache.read "rabbit", :raw => true       # => "1"
-      def increment(key, amount = 1, options = {})
-        options = merged_options(options)
-        instrument(:increment, key, :amount => amount) do
-          failsafe(:increment) do
-            with{|c| c.incrby normalize_key(key, options), amount}
+      def increment(name, amount = 1, options = {})
+        instrument :increment, name, amount: amount do
+          failsafe :increment do
+            options = merged_options(options)
+            key = normalize_key(name, options)
+
+            with do |c|
+              c.incrby(key, amount).tap do
+                write_key_expiry(c, key, options)
+              end
+            end
           end
         end
       end
@@ -217,11 +223,17 @@ module ActiveSupport
       #
       #   cache.decrement "rabbit"
       #   cache.read "rabbit", :raw => true       # => "-1"
-      def decrement(key, amount = 1, options = {})
-        options = merged_options(options)
-        instrument(:decrement, key, :amount => amount) do
-          failsafe(:decrement) do
-            with{|c| c.decrby normalize_key(key, options), amount}
+      def decrement(name, amount = 1, options = {})
+        instrument :decrement, name, amount: amount do
+          failsafe :decrement do
+            options = merged_options(options)
+            key = normalize_key(name, options)
+
+            with do |c|
+              c.decrby(key, amount).tap do
+                write_key_expiry(c, key, options)
+              end
+            end
           end
         end
       end
@@ -276,6 +288,12 @@ module ActiveSupport
             entry = with { |c| c.get key, options }
             return unless entry
             entry.is_a?(Entry) ? entry : Entry.new(entry)
+          end
+        end
+
+        def write_key_expiry(client, key, options)
+          if options[:expires_in] && client.ttl(key).negative?
+            client.expire key, options[:expires_in].to_i
           end
         end
 
