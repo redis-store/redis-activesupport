@@ -292,7 +292,7 @@ module ActiveSupport
         end
 
         def write_key_expiry(client, key, options)
-          if options[:expires_in] && client.ttl(key).negative?
+          if options[:expires_in] && client.ttl(key) < 0
             client.expire key, options[:expires_in].to_i
           end
         end
