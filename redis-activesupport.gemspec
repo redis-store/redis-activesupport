@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency "redis-store",   '>= 1.3', '< 2'
   s.add_runtime_dependency 'activesupport', '>= 3', '< 7'
 
-  s.add_development_dependency 'rake',     '~> 10'
+  s.add_development_dependency 'rake',     '>= 10'
   s.add_development_dependency 'bundler'
   s.add_development_dependency 'mocha',    '~> 0.14.0'
   s.add_development_dependency 'minitest', '>= 4.2', '< 6'

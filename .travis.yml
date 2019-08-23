@@ -37,6 +37,7 @@ gemfile:
 - gemfiles/activesupport_50.gemfile
 - gemfiles/activesupport_51.gemfile
 - gemfiles/activesupport_52.gemfile
+- gemfiles/activesupport_60.gemfile
 deploy:
   provider: rubygems
   api_key:
