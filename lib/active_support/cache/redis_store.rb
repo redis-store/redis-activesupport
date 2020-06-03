@@ -83,9 +83,7 @@ module ActiveSupport
             options[:expires_in] = options[:expires_in].to_f + options[:race_condition_ttl].to_f
           end
 
-          options = options.to_h.symbolize_keys
-
-          entry = options[:raw].present? ? value : Entry.new(value, options)
+          entry = options[:raw].present? ? value : Entry.new(value, options.to_h.symbolize_keys)
           write_entry(normalize_key(name, options), entry, options)
         end
       end
