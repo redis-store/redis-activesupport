@@ -83,17 +83,9 @@ module ActiveSupport
             options[:expires_in] = options[:expires_in].to_f + options[:race_condition_ttl].to_f
           end
 
-          if options[:raw].present?
-            entry = value
-          else
-            entry = Entry.new(
-              value,
-              compress: options[:compress],
-              compress_threshold: options[:compress_threshold],
-              version: options[:version],
-              expires_in: options[:expires_in]
-            )
-          end
+          options.deep_symbolize_keys!
+
+          entry = options[:raw].present? ? value : Entry.new(value, options)
           write_entry(normalize_key(name, options), entry, options)
         end
       end
