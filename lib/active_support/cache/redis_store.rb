@@ -82,7 +82,7 @@ module ActiveSupport
           if options[:expires_in].present? && options[:race_condition_ttl].present? && options[:raw].blank?
             options[:expires_in] = options[:expires_in].to_f + options[:race_condition_ttl].to_f
           end
-          entry = options[:raw].present? ? value : Entry.new(value, **options)
+          entry = options[:raw].present? ? value : Entry.new(value, **options.to_h.symbolize_keys)
           write_entry(normalize_key(name, options), entry, options)
         end
       end
