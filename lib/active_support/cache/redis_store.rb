@@ -27,7 +27,7 @@ module ActiveSupport
       #   RedisStore.new
       #     # => host: localhost,   port: 6379,  db: 0
       #
-      #   RedisStore.new client: Redis.new(url: "redis://127.0.0.1:6380/1")
+      #   RedisStore.new client: Redis::Store.new(url: "redis://127.0.0.1:6380/1")
       #     # => host: localhost,   port: 6379,  db: 0
       #
       #   RedisStore.new "redis://example.com"
