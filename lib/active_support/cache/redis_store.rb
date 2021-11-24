@@ -302,7 +302,7 @@ module ActiveSupport
         #
         # It's really needed and use
         #
-        def delete_entry(key, options)
+        def delete_entry(key, **options)
           failsafe(:delete_entry, returning: false) do
             with { |c| c.del key }
           end
