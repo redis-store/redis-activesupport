@@ -1,10 +1,10 @@
-# This gem is in LTS mode.
+# This gem is no longer being maintained
 
 Rails 5.2.0 [includes a Redis cache store out of the
 box](https://github.com/rails/rails/pull/31134), so you don't really
-need this anymore if you're generating a new Rails application. We
-are no longer accepting new features for this gem, only security
-updates will be considered for new pull requests.
+need this anymore if you're generating a new Rails application. After
+a few years of being in "LTS Mode", we decided to stop maintaining this
+gem in favor of Rails' own Redis Cache Store.
 
 # Redis stores for ActiveSupport
 
