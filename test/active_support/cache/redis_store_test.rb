@@ -26,11 +26,11 @@ describe ActiveSupport::Cache::RedisStore do
     end
   end
 
-  it "uses redis client passed as an option" do
-    redis = Redis.new(url: "redis://127.0.0.1:6380/1")
-    store = ActiveSupport::Cache::RedisStore.new(client: redis)
+  it "uses redis store passed as an option" do
+    redis_store = Redis::Store.new(url: "redis://127.0.0.1:6380/1")
+    store = ActiveSupport::Cache::RedisStore.new(client: redis_store)
 
-    store.data.must_equal(redis)
+    store.data.must_equal(redis_store)
   end
 
   it "connects using an hash of options" do
