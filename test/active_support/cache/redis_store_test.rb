@@ -45,7 +45,7 @@ describe ActiveSupport::Cache::RedisStore do
 
     store.write("rabbit", 0)
 
-    redis.exists("rabbit").must_equal(true)
+    redis.exists?("rabbit").must_equal(true)
   end
 
   it "connects using an string of options" do
@@ -60,7 +60,7 @@ describe ActiveSupport::Cache::RedisStore do
 
     store.write("rabbit", 0)
 
-    redis.exists("rabbit").must_equal(true)
+    redis.exists?("rabbit").must_equal(true)
   end
 
   it "connects using the passed hash of options" do
@@ -74,7 +74,7 @@ describe ActiveSupport::Cache::RedisStore do
 
     store.write("rabbit", 0)
 
-    redis.exists("rabbit").must_equal(true)
+    redis.exists?("rabbit").must_equal(true)
   end
 
   it "raises an error if :pool isn't a pool" do
@@ -90,7 +90,7 @@ describe ActiveSupport::Cache::RedisStore do
 
     store.write("white-rabbit", 0)
 
-    redis.exists('cache-namespace:white-rabbit').must_equal(true)
+    redis.exists?('cache-namespace:white-rabbit').must_equal(true)
   end
 
   it "creates a normal store when given no addresses" do
